@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { compareSync } from 'bcrypt'
+import { encryptPassword } from '@jingo/utils'
 
 import { UsersService } from '../users/users.service'
 import { RegisterDto } from './dtos/register.dto'
 import { User } from '../users/schemas/user.schema'
-import { encryptPassword } from '@jingo/utils'
 
 @Injectable()
 export class AuthService {
@@ -18,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private generateJwt(user: User) {
+  private generateJwt(user: User): string {
     const payload = {
       username: user.username,
       sub: user._id,
@@ -27,53 +27,41 @@ export class AuthService {
     return this.jwtService.sign(payload)
   }
 
-  public async validateUser(username: string, pass: string): Promise<any> {
+  public async validateUser(username: string, password: string): Promise<User> {
     const user = await this.userService.findOneByUsername(username)
     if (user) {
-      if (!compareSync(pass, user.password)) {
+      if (!compareSync(password, user.password)) {
         throw new BadRequestException('密码不正确')
       }
-      const { password, ...rest } = user
-      return rest
+      return user
     }
     return null
   }
 
-  public async verify(user: any) {
+  public async verify(user: any): Promise<User> {
     const verified = await this.userService.findOneById(user._id)
     if (!verified) return null
-    return {
-      id: verified._id,
-      username: verified.username,
-      mail: verified.mail,
-      avatar: verified.avatar,
-    }
+    return verified
   }
 
-  public async login(body: { username: string; password: string }) {
+  public async login(body: {
+    username: string
+    password: string
+  }): Promise<User & { token: string }> {
     const user = await this.validateUser(body.username, body.password)
-    const { _id, username, mail, avatar } = user
-    return {
-      token: this.generateJwt(user),
-      id: _id,
-      username,
-      mail,
-      avatar,
-    }
+    const token = this.generateJwt(user)
+    return Object.assign(user, { token })
   }
 
-  public async register(registerDto: RegisterDto) {
-    const { username, mail, avatar } = registerDto
+  public async register(
+    registerDto: RegisterDto,
+  ): Promise<User & { token: string }> {
+    const { username, mail } = registerDto
     const valid = await this.userService.validateUsernameAndMail(username, mail)
     if (!valid) return null
     const user = await this.userService.create(registerDto)
-    return {
-      token: this.generateJwt(user),
-      id: user._id,
-      username,
-      mail,
-      avatar,
-    }
+    const token = this.generateJwt(user)
+    return Object.assign(user, { token })
   }
 
   public async changePwd(id: string, oldPwd: string, newPwd: string) {

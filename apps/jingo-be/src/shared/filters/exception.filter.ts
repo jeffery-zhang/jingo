@@ -9,16 +9,17 @@ import { Response } from 'express'
 @Catch(HttpException)
 export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
-    console.log('lets see exception response: ', exception.getResponse())
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
     const status = exception.getStatus()
 
     const getExceptionMessage = () => {
-      if (exception.message) return exception.message
       const res = exception.getResponse()
+      if (!res && exception.message) return exception.message
       if (typeof res === 'string') return res
-      if (typeof res === 'object') return (res as any).message
+      if (typeof res === 'object' && (res as any).message)
+        return (res as any).message
+      return ''
     }
 
     response.status(status).json({

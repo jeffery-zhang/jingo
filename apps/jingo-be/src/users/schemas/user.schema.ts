@@ -23,7 +23,7 @@ export class User extends Document {
   @Prop()
   roles: Role[]
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: new Date() })
   createTime: Date
 
   @Prop({ required: true, default: new Date() })

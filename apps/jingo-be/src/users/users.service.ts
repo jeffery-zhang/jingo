@@ -10,11 +10,11 @@ import { UpdateDto } from './dtos/update.dto'
 export class UsersService {
   constructor(@InjectModel('User') private userModel: Model<User>) {}
 
-  async getUsersCount(): Promise<number> {
+  async getAllCount(): Promise<number> {
     return await this.userModel.estimatedDocumentCount()
   }
 
-  async findAll() {
+  async findAll(): Promise<User[]> {
     return await this.userModel.find().lean()
   }
 
@@ -31,28 +31,32 @@ export class UsersService {
   }
 
   async create(registerDto: RegisterDto): Promise<User> {
-    const createTime = new Date()
-    const updateTime = new Date()
-    return await this.userModel.create({
-      ...registerDto,
-      createTime,
-      updateTime,
-    })
+    return await this.userModel.create(registerDto)
   }
 
   async update(id: string, updateDto: UpdateDto): Promise<User> {
-    const updateTime = new Date()
-    return await this.userModel.findByIdAndUpdate(
-      id,
-      {
-        ...updateDto,
-        updateTime,
-      },
-      { new: true },
+    const valid = this.validateUsernameAndMail(
+      updateDto.username,
+      updateDto.mail,
     )
+    if (!valid) return
+    const updateTime = new Date()
+    return await this.userModel
+      .findByIdAndUpdate(
+        id,
+        {
+          ...updateDto,
+          updateTime,
+        },
+        { new: true },
+      )
+      .lean()
   }
 
-  public async validateUsernameAndMail(username: string, mail: string) {
+  public async validateUsernameAndMail(
+    username: string,
+    mail: string,
+  ): Promise<boolean> {
     const user = await this.findOneByUsername(username)
     if (user) {
       throw new ForbiddenException('用户名已存在')

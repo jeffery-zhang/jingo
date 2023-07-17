@@ -38,8 +38,11 @@ export class BodyInterceptor implements NestInterceptor {
         const res = context.switchToHttp().getResponse()
         const status = res.statusCode
         const success = status >= 200 && status < 300
-        const message = success && data.message ? data.message : ''
-        return new ResponseBody(success, message, status, data)
+        const getResponseMessage = () => {
+          if (res.message) return res.message
+          return data.message ?? ''
+        }
+        return new ResponseBody(success, getResponseMessage(), status, data)
       }),
     )
   }
