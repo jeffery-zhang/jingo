@@ -1,0 +1,8 @@
+{
+  "extends": "@jingo/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "UMD",
+    "outDir": "build"
+  },
+  "exclude": ["node_modules", "build"]
+}

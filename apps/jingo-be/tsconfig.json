@@ -1,0 +1,10 @@
+{
+  "extends": ["@jingo/tsconfig/base.json"],
+  "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": false,
+    "module": "commonjs",
+    "outDir": "./build"
+  }
+}

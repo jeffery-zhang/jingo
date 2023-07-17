@@ -5,6 +5,7 @@
     "target": "ESNext",
     "module": "ESNext",
     "composite": false,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
@@ -14,9 +15,11 @@
     "moduleResolution": "node",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "noImplicitAny": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "strictNullChecks": false
   },
   "exclude": ["node_modules"]
 }

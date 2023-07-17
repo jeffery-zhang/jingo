@@ -33,4 +33,5 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
   },
+  ignorePatterns: ['.eslintrc.*', 'build', 'node_modules'],
 }

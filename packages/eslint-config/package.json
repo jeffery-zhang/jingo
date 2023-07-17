@@ -1,5 +1,5 @@
 {
-  "name": "@tvb/eslint-config",
+  "name": "@jingo/eslint-config",
   "version": "1.0.0",
   "main": "index.js",
   "author": "jeffery-zhang",
