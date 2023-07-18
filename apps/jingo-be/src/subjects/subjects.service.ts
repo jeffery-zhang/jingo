@@ -16,6 +16,10 @@ export class SubjectsService {
     return await this.subjectModel.estimatedDocumentCount()
   }
 
+  async search() {
+    return
+  }
+
   async findAll(): Promise<Subject[]> {
     return await this.subjectModel.find().lean()
   }
@@ -44,5 +48,13 @@ export class SubjectsService {
         { new: true },
       )
       .lean()
+  }
+
+  async deleteById(id: string) {
+    return await this.subjectModel.findByIdAndDelete(id)
+  }
+
+  async batchDeleteByIds(ids: string[]): Promise<any> {
+    return await this.subjectModel.deleteMany({ _id: { $in: ids } })
   }
 }
