@@ -20,7 +20,29 @@ export class SubjectsService {
     return await this.subjectModel.find().lean()
   }
 
+  async findOneById(id: string): Promise<Subject> {
+    return await this.subjectModel.findById(id).lean()
+  }
+
+  async findOneByName(name: string): Promise<Subject> {
+    return await this.subjectModel.findOne({ name }).lean()
+  }
+
   async create(createDto: CreateSubjectDto): Promise<Subject> {
     return await this.subjectModel.create(createDto)
+  }
+
+  async update(id: string, updateDto: UpdateSubjectDto): Promise<Subject> {
+    const updateTime = new Date()
+    return await this.subjectModel
+      .findByIdAndUpdate(
+        id,
+        {
+          ...updateDto,
+          updateTime,
+        },
+        { new: true },
+      )
+      .lean()
   }
 }
