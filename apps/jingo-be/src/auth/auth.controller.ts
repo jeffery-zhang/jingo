@@ -55,6 +55,6 @@ export class AuthController {
   ): Promise<OperationEntity> {
     const id = req.user._id
     await this.authService.changePwd(id, body.oldPwd, body.password)
-    return { message: '密码修改成功' }
+    return new OperationEntity('修改密码成功')
   }
 }

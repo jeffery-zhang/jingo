@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
+import {
+  MongoSearchConditions,
+  ISearchParams,
+  TResponseSearchRecords,
+} from '@jingo/utils'
 
 import { Subject } from './schemas/subject.schema'
 import { CreateSubjectDto } from './dtos/create-subject.dto'
@@ -16,8 +21,32 @@ export class SubjectsService {
     return await this.subjectModel.estimatedDocumentCount()
   }
 
-  async search() {
-    return
+  async search(
+    params: ISearchParams,
+  ): Promise<TResponseSearchRecords<Subject>> {
+    const { conditions, pager, sorter } = new MongoSearchConditions(params, {
+      sortBy: params.sortBy || 'sort',
+      keywords: ['name', 'alias'],
+    })
+
+    const query = await this.subjectModel
+      .find(conditions)
+      .skip(pager.skipCount)
+      .limit(pager.pageSize)
+      .sort(sorter)
+
+    const total = await this.getAllCount()
+    const totalPage = Math.ceil(
+      total / (pager.pageSize === 0 ? 1 : pager.pageSize),
+    )
+
+    return {
+      page: pager.page,
+      pageSize: pager.pageSize,
+      total,
+      totalPage,
+      records: query,
+    }
   }
 
   async findAll(): Promise<Subject[]> {

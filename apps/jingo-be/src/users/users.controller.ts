@@ -50,7 +50,6 @@ export class UsersController {
   async updateUser(@Request() req, @Body() updateDto: UpdateDto) {
     const id = req.user._id
     const user = await this.userService.update(id, updateDto)
-    console.log('lets see updated user: ', user)
     return new UserEntity(user)
   }
 }
