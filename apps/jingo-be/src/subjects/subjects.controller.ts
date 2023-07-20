@@ -61,18 +61,18 @@ export class SubjectsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('delete/:id')
+  @Delete('batchDelete')
+  async batchDelete(@Body('ids') ids: string[]): Promise<OperationEntity> {
+    await this.subjectsService.batchDeleteByIds(ids)
+    return new OperationEntity('批量删除主题成功')
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
   async delete(
     @Param('id', ObjectIdPipe) id: string,
   ): Promise<OperationEntity> {
     await this.subjectsService.deleteById(id)
     return new OperationEntity('删除主题成功')
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Delete('batchDelete')
-  async batchDelete(@Body('ids') ids: string[]): Promise<OperationEntity> {
-    await this.subjectsService.batchDeleteByIds(ids)
-    return new OperationEntity('批量删除主题成功')
   }
 }

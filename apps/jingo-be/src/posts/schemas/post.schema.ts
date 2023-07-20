@@ -11,7 +11,7 @@ export class Post extends Document {
   @Prop({ required: true })
   summary: string
 
-  @Prop({ required: true })
+  @Prop({ default: '' })
   poster: string
 
   @Prop({ required: true })

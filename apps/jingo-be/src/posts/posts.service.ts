@@ -1,12 +1,12 @@
 import { Injectable, BadRequestException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
+import { MongoSearchConditions, TResponseSearchRecords } from '@jingo/utils'
 
 import { Post } from './schemas/post.schema'
 import { IPostsSearchParams } from './interfaces/post.interface'
 import { CreatePostDto } from './dtos/create-post.dto'
 import { UpdatePostDto } from './dtos/update-post.dto'
-import { MongoSearchConditions, TResponseSearchRecords } from '@jingo/utils'
 import { SubjectsService } from '../subjects/subjects.service'
 import { CategoriesService } from '../categories/categories.service'
 import { Subject } from '../subjects/schemas/subject.schema'
@@ -64,6 +64,7 @@ export class PostsService {
       .skip(pager.skipCount)
       .limit(pager.pageSize)
       .sort(sorter)
+      .select('-content')
 
     const total = query.length
     const totalPage = Math.ceil(
@@ -80,7 +81,7 @@ export class PostsService {
   }
 
   async findAll(): Promise<Post[]> {
-    return await this.postModel.find().lean()
+    return await this.postModel.find().select('-content').lean()
   }
 
   async findOneById(id: string): Promise<Post> {

@@ -27,7 +27,6 @@ export class UserChecker implements CanActivate {
     if (!item) throw new BadRequestException('请求参数错误')
 
     if (roles.includes('admin')) return true
-
     if (_id !== item.author._id) throw new UnauthorizedException('用户权限不足')
 
     return true
