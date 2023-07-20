@@ -1,54 +1,31 @@
-import { Type } from 'class-transformer'
 import {
   IsString,
-  IsNotEmpty,
+  IsOptional,
   MinLength,
   MaxLength,
   IsNumber,
   IsPositive,
-  IsObject,
-  ValidateNested,
 } from 'class-validator'
 
 export class UpdateCategoryDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(10)
   @MinLength(1)
   public readonly name: string
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(15)
   @MinLength(2)
   public readonly alias: string
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   @IsPositive()
   public readonly sort: number
 
-  @IsNotEmpty()
-  @IsObject()
-  @ValidateNested({ each: true })
-  @Type(() => CategoryParentDto)
-  public readonly parent: CategoryParentDto
-}
-
-export class CategoryParentDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  public readonly _id: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  public readonly name: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(15)
-  @MinLength(2)
-  public readonly alias: string
+  public readonly parentId: string
 }

@@ -67,13 +67,13 @@ export class CategoriesController {
     @Param('id', ObjectIdPipe) id: string,
   ): Promise<OperationEntity> {
     await this.categoriesService.deleteById(id)
-    return new OperationEntity('删除主题成功')
+    return new OperationEntity('删除分类成功')
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('batchDelete')
   async batchDelete(@Body('ids') ids: string[]): Promise<OperationEntity> {
     await this.categoriesService.batchDeleteByIds(ids)
-    return new OperationEntity('批量删除主题成功')
+    return new OperationEntity('批量删除分类成功')
   }
 }

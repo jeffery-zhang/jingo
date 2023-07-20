@@ -19,7 +19,7 @@ export class MongoSearchConditions {
   public conditions: { [key: string]: any }
 
   constructor(params: ISearchParams, options: IConditionsOption) {
-    this.pager = this.generatePager(params.page, params.pageSize)
+    this.pager = this.generatePager(params.page || 1, params.pageSize || 10)
     this.sorter = this.generateSorter(options.sortBy, params.order)
     this.conditions = this.generateConditions(params, options.keywords)
   }

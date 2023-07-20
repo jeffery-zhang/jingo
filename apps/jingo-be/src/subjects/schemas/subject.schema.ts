@@ -12,7 +12,7 @@ export class Subject extends Document {
   alias: string
 
   @Prop({ required: true })
-  sort: string
+  sort: number
 
   @Prop({ required: true, default: () => new Date() })
   createTime: Date

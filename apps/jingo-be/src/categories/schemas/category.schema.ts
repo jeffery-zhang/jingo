@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
 
 export type CategoryDocument = Category & Document
@@ -12,10 +12,16 @@ export class Category extends Document {
   alias: string
 
   @Prop({ required: true })
-  sort: string
+  sort: number
 
-  @Prop({ required: true })
-  parent: object
+  @Prop(
+    raw({
+      _id: { type: String, required: true },
+      name: { type: String, required: true },
+      alias: { type: String, required: true },
+    }),
+  )
+  parent: Record<string, string>
 
   @Prop({ required: true, default: () => new Date() })
   createTime: Date

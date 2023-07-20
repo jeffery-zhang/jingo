@@ -35,7 +35,7 @@ export class SubjectsService {
       .limit(pager.pageSize)
       .sort(sorter)
 
-    const total = await this.getAllCount()
+    const total = query.length
     const totalPage = Math.ceil(
       total / (pager.pageSize === 0 ? 1 : pager.pageSize),
     )
