@@ -1,14 +1,12 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common'
+import { Injectable, BadRequestException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { MongoSearchConditions, TResponseSearchRecords } from '@jingo/utils'
 
-import { Post } from './schemas/post.schema'
+import { Post } from './schemas/comment.schema'
 import { IPostsSearchParams } from './interfaces/post.interface'
-import { CreatePostDto } from './dtos/create-post.dto'
-import { UpdatePostDto } from './dtos/update-post.dto'
+import { CreatePostDto } from './dtos/create-comment.dto'
+import { UpdatePostDto } from './dtos/update-comment.dto'
 import { SubjectsService } from '../subjects/subjects.service'
 import { CategoriesService } from '../categories/categories.service'
 import { Subject } from '../subjects/schemas/subject.schema'
@@ -20,7 +18,6 @@ import { UsersService } from '../users/users.service'
 export class PostsService {
   constructor(
     @InjectModel('Post') private readonly postModel: Model<Post>,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly usersService: UsersService,
     private readonly subjectsService: SubjectsService,
     private readonly categoriesService: CategoriesService,
@@ -48,26 +45,6 @@ export class PostsService {
     } catch (err) {
       throw new BadRequestException('未找到对应分类')
     }
-  }
-
-  private async getPostPv(postId: string): Promise<number> {
-    const postPvId = `post_${postId}_pv`
-    let pv: number = await this.cacheManager.get(postPvId)
-    if (!pv) {
-      pv = (await this.findOneById(postId)).pv
-      await this.cacheManager.set(postPvId, pv)
-    }
-    return pv
-  }
-
-  private async getPostLikes(postId: string): Promise<string[]> {
-    const postLikesId = `post_${postId}_likes`
-    let likes: string[] = await this.cacheManager.get(postLikesId)
-    if (!likes) {
-      likes = (await this.findOneById(postId)).likes
-      await this.cacheManager.set(postLikesId, likes)
-    }
-    return likes
   }
 
   async getAllCount(): Promise<number> {

@@ -11,11 +11,11 @@ import {
   Param,
 } from '@nestjs/common'
 
-import { PostsService } from './posts.service'
+import { PostsService } from './comments.service'
 import { ObjectIdPipe } from '../shared/pipes/object-id.pipe'
 import { IPostsSearchParams } from './interfaces/post.interface'
-import { CreatePostDto } from './dtos/create-post.dto'
-import { UpdatePostDto } from './dtos/update-post.dto'
+import { CreatePostDto } from './dtos/create-comment.dto'
+import { UpdatePostDto } from './dtos/update-comment.dto'
 import { JwtAuthGuard } from '../auth/jwt.stradegy'
 import { UserChecker } from './guards/user-checker.guard'
 import { Roles } from '../roles/role.decorator'
@@ -31,7 +31,7 @@ export class PostsController {
     return await this.postsService.search(params)
   }
 
-  @Get('post/:id')
+  @Get('realView/:id')
   async viewOneById(@Param('id', ObjectIdPipe) id: string) {
     this.postsService.increasePv(id)
     return await this.postsService.findOneById(id)

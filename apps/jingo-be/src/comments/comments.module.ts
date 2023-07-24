@@ -1,20 +1,16 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { CacheModule } from '@nestjs/cache-manager'
 
-import { Post, PostSchema } from './schemas/post.schema'
+import { Comment, CommentSchema } from './schemas/comment.schema'
 import { UsersModule } from '../users/users.module'
 import { SubjectsModule } from '../subjects/subjects.module'
 import { CategoriesModule } from '../categories/categories.module'
-import { PostsController } from './posts.controller'
-import { PostsService } from './posts.service'
+import { PostsController } from './comments.controller'
+import { PostsService } from './comments.service'
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-    CacheModule.register({
-      ttl: 1800,
-    }),
+    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     UsersModule,
     SubjectsModule,
     CategoriesModule,
@@ -23,4 +19,4 @@ import { PostsService } from './posts.service'
   providers: [PostsService],
   exports: [PostsService],
 })
-export class PostsModule {}
+export class CommentsModule {}
