@@ -41,9 +41,11 @@ export class MongoSearchConditions {
   generateConditions(params: ISearchParams, keys: string[]) {
     const { page, pageSize, order, sortBy, keywords, ...rest } = params
     const conditions = {
-      ...rest,
       $or: [],
     }
+    Object.keys(rest).forEach((key) => {
+      if (rest[key] || rest[key] === 0) conditions[key] = rest[key]
+    })
     keys.forEach((key) => {
       conditions['$or'].push({ [key]: { $regex: new RegExp(keywords, 'i') } })
     })

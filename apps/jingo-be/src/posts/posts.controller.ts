@@ -37,6 +37,12 @@ export class PostsController {
     return await this.postsService.findOneById(id)
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('like/:id')
+  async likeOneByid(@Param('id', ObjectIdPipe) id: string, @Request() req) {
+    return await this.postsService.increaseLikes(id, req.user._id)
+  }
+
   @Get(':id')
   async findOneById(@Param('id', ObjectIdPipe) id: string) {
     return await this.postsService.findOneById(id)

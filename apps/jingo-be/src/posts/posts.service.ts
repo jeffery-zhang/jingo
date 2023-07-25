@@ -50,7 +50,7 @@ export class PostsService {
     }
   }
 
-  private async getPostPv(postId: string): Promise<number> {
+  private async getPv(postId: string): Promise<number> {
     const postPvId = `post_${postId}_pv`
     let pv: number = await this.cacheManager.get(postPvId)
     if (!pv) {
@@ -60,7 +60,7 @@ export class PostsService {
     return pv
   }
 
-  private async getPostLikes(postId: string): Promise<string[]> {
+  private async getLikes(postId: string): Promise<string[]> {
     const postLikesId = `post_${postId}_likes`
     let likes: string[] = await this.cacheManager.get(postLikesId)
     if (!likes) {
@@ -151,9 +151,25 @@ export class PostsService {
     return await this.postModel.deleteMany({ _id: { $in: ids } })
   }
 
-  async increasePv(id: string): Promise<Omit<Post, '_id' | 'pv'>> {
-    return await this.postModel
-      .findOneAndUpdate({ _id: id }, { $inc: { pv: 1 } }, { new: true })
-      .select('pv')
+  async increasePv(id: string): Promise<{ _id: string; pv: number }> {
+    const pv = await this.getPv(id)
+    await this.cacheManager.set(`post_${id}_pv`, pv + 1)
+    return {
+      _id: id,
+      pv: pv + 1,
+    }
+  }
+
+  async increaseLikes(
+    id: string,
+    userId: string,
+  ): Promise<{ _id: string; likes: string[] }> {
+    const likes = await this.getLikes(id)
+    likes.push(userId)
+    await this.cacheManager.set(`post_${id}_likes`, likes)
+    return {
+      _id: id,
+      likes,
+    }
   }
 }

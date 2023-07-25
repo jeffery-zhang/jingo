@@ -1,26 +1,25 @@
-import { Injectable, BadRequestException } from '@nestjs/common'
+import { Injectable, Inject, BadRequestException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { MongoSearchConditions, TResponseSearchRecords } from '@jingo/utils'
 
-import { Post } from './schemas/comment.schema'
-import { IPostsSearchParams } from './interfaces/post.interface'
-import { CreatePostDto } from './dtos/create-comment.dto'
-import { UpdatePostDto } from './dtos/update-comment.dto'
-import { SubjectsService } from '../subjects/subjects.service'
-import { CategoriesService } from '../categories/categories.service'
-import { Subject } from '../subjects/schemas/subject.schema'
+import { Comment } from './schemas/comment.schema'
+import { CreateCommentsDto } from './dtos/create-comment.dto'
+import { UpdateCommentsDto } from './dtos/update-comment.dto'
+import { PostsService } from '../posts/posts.service'
 import { User } from '../users/schemas/user.schema'
-import { Category } from '../categories/schemas/category.schema'
 import { UsersService } from '../users/users.service'
+import { ICommentsSearchParams } from './interfaces/comment.interface'
 
 @Injectable()
-export class PostsService {
+export class CommentsService {
   constructor(
-    @InjectModel('Post') private readonly postModel: Model<Post>,
+    @InjectModel('Comment') private readonly commentModel: Model<Comment>,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly usersService: UsersService,
-    private readonly subjectsService: SubjectsService,
-    private readonly categoriesService: CategoriesService,
+    private readonly postsService: PostsService,
   ) {}
 
   private async getAuthor(id: string): Promise<User> {
@@ -31,40 +30,42 @@ export class PostsService {
     }
   }
 
-  private async getSubject(id: string): Promise<Subject> {
+  private async validdatePost(id: string): Promise<boolean> {
     try {
-      return await this.subjectsService.findOneById(id)
+      await this.postsService.findOneById(id)
+      return true
     } catch (err) {
-      throw new BadRequestException('未找到对应主题')
+      throw new BadRequestException('未找到文章')
     }
   }
 
-  private async getCategory(id: string): Promise<Category> {
-    try {
-      return await this.categoriesService.findOneById(id)
-    } catch (err) {
-      throw new BadRequestException('未找到对应分类')
+  private async getLikes(postId: string): Promise<string[]> {
+    const postLikesId = `comment_${postId}_likes`
+    let likes: string[] = await this.cacheManager.get(postLikesId)
+    if (!likes) {
+      likes = (await this.findOneById(postId)).likes
+      await this.cacheManager.set(postLikesId, likes)
     }
+    return likes
   }
 
   async getAllCount(): Promise<number> {
-    return await this.postModel.estimatedDocumentCount()
+    return await this.commentModel.estimatedDocumentCount()
   }
 
   async search(
-    params: IPostsSearchParams,
-  ): Promise<TResponseSearchRecords<Post>> {
+    params: ICommentsSearchParams,
+  ): Promise<TResponseSearchRecords<Comment>> {
     const { conditions, pager, sorter } = new MongoSearchConditions(params, {
       sortBy: params.sortBy || 'createTime',
-      keywords: ['title', 'summary'],
+      keywords: ['content'],
     })
 
-    const query = await this.postModel
+    const query = await this.commentModel
       .find(conditions)
       .skip(pager.skipCount)
       .limit(pager.pageSize)
       .sort(sorter)
-      .select('-content')
 
     const total = query.length
     const totalPage = Math.ceil(
@@ -80,57 +81,62 @@ export class PostsService {
     }
   }
 
-  async findAll(): Promise<Post[]> {
-    return await this.postModel.find().select('-content').lean()
+  async findOneById(id: string): Promise<Comment> {
+    return this.commentModel.findById(id).lean()
   }
 
-  async findOneById(id: string): Promise<Post> {
-    return this.postModel.findById(id).lean()
+  async findOneByTitle(title: string): Promise<Comment> {
+    return this.commentModel.findOne({ title }).lean()
   }
 
-  async findOneByTitle(title: string): Promise<Post> {
-    return this.postModel.findOne({ title }).lean()
-  }
-
-  async create(userId: string, createPostDto: CreatePostDto): Promise<Post> {
+  async create(
+    userId: string,
+    createCommentDto: CreateCommentsDto,
+  ): Promise<Comment> {
+    await this.validdatePost(createCommentDto.postId)
     const author = await this.getAuthor(userId)
-    const category = await this.getCategory(createPostDto.categoryId)
-    const subject = await this.getSubject(category.parent._id)
 
-    return await this.postModel.create({
-      ...createPostDto,
+    return await this.commentModel.create({
+      ...createCommentDto,
       author,
-      subject,
-      category,
     })
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
+  async update(
+    id: string,
+    updateCommentDto: UpdateCommentsDto,
+  ): Promise<Comment> {
+    if (!updateCommentDto.content) {
+      throw new BadRequestException('更新内容不能为空')
+    }
     const updateTime = new Date()
     const dto: any = {
-      ...updatePostDto,
+      content: updateCommentDto.content,
       updateTime,
     }
-    if (updatePostDto.categoryId) {
-      const category = await this.getCategory(updatePostDto.categoryId)
-      const subject = await this.getSubject(category.parent._id)
-      dto.category = category
-      dto.subject = subject
-    }
-    return await this.postModel.findByIdAndUpdate(id, dto, { new: true }).lean()
+    return await this.commentModel
+      .findByIdAndUpdate(id, dto, { new: true })
+      .lean()
   }
 
   async deleteById(id: string) {
-    return await this.postModel.findByIdAndDelete(id)
+    return await this.commentModel.findByIdAndDelete(id)
   }
 
   async batchDeleteByIds(ids: string[]): Promise<any> {
-    return await this.postModel.deleteMany({ _id: { $in: ids } })
+    return await this.commentModel.deleteMany({ _id: { $in: ids } })
   }
 
-  async increasePv(id: string): Promise<Omit<Post, '_id' | 'pv'>> {
-    return await this.postModel
-      .findOneAndUpdate({ _id: id }, { $inc: { pv: 1 } }, { new: true })
-      .select('pv')
+  async increaseLikes(
+    id: string,
+    userId: string,
+  ): Promise<{ _id: string; likes: string[] }> {
+    const likes = await this.getLikes(id)
+    likes.push(userId)
+    await this.cacheManager.set(`comment_${id}_likes`, likes)
+    return {
+      _id: id,
+      likes,
+    }
   }
 }

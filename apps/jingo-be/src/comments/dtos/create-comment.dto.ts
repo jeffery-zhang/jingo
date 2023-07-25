@@ -5,9 +5,9 @@ export class CreateCommentsDto {
   @IsString()
   @MinLength(1)
   @MaxLength(255)
-  content: string
+  public readonly content: string
 
   @IsNotEmpty()
   @IsString()
-  postId: string
+  public readonly postId: string
 }

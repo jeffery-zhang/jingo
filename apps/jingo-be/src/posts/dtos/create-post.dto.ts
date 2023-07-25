@@ -12,27 +12,27 @@ export class CreatePostDto {
   @IsString()
   @MinLength(1)
   @MaxLength(50)
-  title: string
+  public readonly title: string
 
   @IsNotEmpty()
   @IsString()
   @MinLength(1)
   @MaxLength(255)
-  summary: string
+  public readonly summary: string
 
   @IsOptional()
   @IsString()
-  poster: string
+  public readonly poster: string
 
   @IsNotEmpty()
   @IsString()
-  content: string
+  public readonly content: string
 
   @IsNotEmpty()
   @IsString()
-  categoryId: string
+  public readonly categoryId: string
 
   @IsNotEmpty()
   @IsBoolean()
-  isPublic: boolean
+  public readonly isPublic: boolean
 }

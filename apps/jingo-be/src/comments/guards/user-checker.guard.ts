@@ -5,11 +5,11 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common'
-import { PostsService } from '../comments.service'
+import { CommentsService } from '../comments.service'
 
 @Injectable()
 export class UserChecker implements CanActivate {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly commentsService: CommentsService) {}
 
   async canActivate(context: ExecutionContext) {
     const { user, params, body, method } = context.switchToHttp().getRequest()
@@ -23,7 +23,7 @@ export class UserChecker implements CanActivate {
     if (['POST', 'PUT'].includes(method) && body.id) itemId = body.id
     if (!itemId) throw new BadRequestException('请求参数错误')
 
-    const item = await this.postsService.findOneById(itemId)
+    const item = await this.commentsService.findOneById(itemId)
     if (!item) throw new BadRequestException('请求参数错误')
 
     if (roles.includes('admin')) return true

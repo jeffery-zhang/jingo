@@ -21,8 +21,8 @@ export class Comment extends Document {
   @Prop({ required: true })
   postId: string
 
-  @Prop({ required: true, default: 0 })
-  like: number
+  @Prop({ required: true, default: [], type: [String] })
+  likes: string[]
 
   @Prop({ required: true, default: () => new Date() })
   createTime: Date

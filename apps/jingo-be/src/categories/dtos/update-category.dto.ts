@@ -5,9 +5,14 @@ import {
   MaxLength,
   IsNumber,
   IsPositive,
+  IsNotEmpty,
 } from 'class-validator'
 
 export class UpdateCategoryDto {
+  @IsNotEmpty()
+  @IsString()
+  public readonly id: string
+
   @IsOptional()
   @IsString()
   @MaxLength(10)

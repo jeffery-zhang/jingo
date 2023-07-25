@@ -9,6 +9,10 @@ import {
 } from 'class-validator'
 
 export class UpdateSubjectDto {
+  @IsNotEmpty()
+  @IsString()
+  public readonly id: string
+
   @IsOptional()
   @IsString()
   @IsNotEmpty()

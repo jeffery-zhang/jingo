@@ -1,37 +1,19 @@
 import {
-  IsBoolean,
   IsOptional,
   IsString,
   MinLength,
   MaxLength,
+  IsNotEmpty,
 } from 'class-validator'
 
-export class UpdatePostDto {
-  @IsOptional()
+export class UpdateCommentsDto {
+  @IsNotEmpty()
   @IsString()
-  @MinLength(1)
-  @MaxLength(50)
-  title: string
+  public readonly id: string
 
   @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(255)
-  summary: string
-
-  @IsOptional()
-  @IsString()
-  poster: string
-
-  @IsOptional()
-  @IsString()
-  content: string
-
-  @IsOptional()
-  @IsString()
-  categoryId: string
-
-  @IsOptional()
-  @IsBoolean()
-  isPublic: boolean
+  public readonly content: string
 }
