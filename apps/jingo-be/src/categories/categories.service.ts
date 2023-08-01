@@ -42,6 +42,7 @@ export class CategoriesService {
       .skip(pager.skipCount)
       .limit(pager.pageSize)
       .sort(sorter)
+      .lean()
 
     const total = query.length
     const totalPage = Math.ceil(
@@ -71,10 +72,12 @@ export class CategoriesService {
 
   async create(createDto: CreateCategoryDto): Promise<Category> {
     const parent = await this.getParent(createDto.parentId)
-    return await this.categoryModel.create({
-      ...createDto,
-      parent,
-    })
+    return (
+      await this.categoryModel.create({
+        ...createDto,
+        parent,
+      })
+    ).toObject()
   }
 
   async update(id: string, updateDto: UpdateCategoryDto): Promise<Category> {
@@ -92,7 +95,7 @@ export class CategoriesService {
       .lean()
   }
 
-  async deleteById(id: string) {
+  async deleteById(id: string): Promise<Category> {
     return await this.categoryModel.findByIdAndDelete(id)
   }
 

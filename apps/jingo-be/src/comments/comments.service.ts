@@ -11,7 +11,10 @@ import { UpdateCommentsDto } from './dtos/update-comment.dto'
 import { PostsService } from '../posts/posts.service'
 import { User } from '../users/schemas/user.schema'
 import { UsersService } from '../users/users.service'
-import { ICommentsSearchParams } from './interfaces/comment.interface'
+import {
+  ICommentsSearchParams,
+  ICommentLikes,
+} from './interfaces/comment.interface'
 
 @Injectable()
 export class CommentsService {
@@ -85,10 +88,6 @@ export class CommentsService {
     return this.commentModel.findById(id).lean()
   }
 
-  async findOneByTitle(title: string): Promise<Comment> {
-    return this.commentModel.findOne({ title }).lean()
-  }
-
   async create(
     userId: string,
     createCommentDto: CreateCommentsDto,
@@ -96,10 +95,12 @@ export class CommentsService {
     await this.validdatePost(createCommentDto.postId)
     const author = await this.getAuthor(userId)
 
-    return await this.commentModel.create({
-      ...createCommentDto,
-      author,
-    })
+    return (
+      await this.commentModel.create({
+        ...createCommentDto,
+        author,
+      })
+    ).toObject()
   }
 
   async update(
@@ -119,7 +120,7 @@ export class CommentsService {
       .lean()
   }
 
-  async deleteById(id: string) {
+  async deleteById(id: string): Promise<Comment> {
     return await this.commentModel.findByIdAndDelete(id)
   }
 
@@ -127,10 +128,7 @@ export class CommentsService {
     return await this.commentModel.deleteMany({ _id: { $in: ids } })
   }
 
-  async increaseLikes(
-    id: string,
-    userId: string,
-  ): Promise<{ _id: string; likes: string[] }> {
+  async increaseLikes(id: string, userId: string): Promise<ICommentLikes> {
     const likes = await this.getLikes(id)
     likes.push(userId)
     await this.cacheManager.set(`comment_${id}_likes`, likes)

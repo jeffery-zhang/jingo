@@ -10,6 +10,7 @@ import {
   Body,
   Param,
 } from '@nestjs/common'
+import { TResponseSearchRecords } from '@jingo/utils'
 
 import { CommentsService } from './comments.service'
 import { ObjectIdPipe } from '../shared/pipes/object-id.pipe'
@@ -20,38 +21,46 @@ import { UserChecker } from './guards/user-checker.guard'
 import { Roles } from '../roles/role.decorator'
 import { Role } from '../roles/role.enum'
 import { RolesGuard } from '../roles/role.guard'
-import { ICommentsSearchParams } from './interfaces/comment.interface'
+import { OperationEntity } from '../shared/entities/operation.entity'
+import {
+  ICommentLikes,
+  ICommentsSearchParams,
+} from './interfaces/comment.interface'
+import { Comment } from './schemas/comment.schema'
 
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get()
-  async search(@Query() params: ICommentsSearchParams) {
+  async search(
+    @Query() params: ICommentsSearchParams,
+  ): Promise<TResponseSearchRecords<Comment>> {
     return await this.commentsService.search(params)
-  }
-
-  @Get('comment/:id')
-  async viewOneById(@Param('id', ObjectIdPipe) id: string) {
-    return await this.commentsService.findOneById(id)
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('like/:id')
-  async likeOneByid(@Param('id', ObjectIdPipe) id: string, @Request() req) {
+  async likeOneById(
+    @Param('id', ObjectIdPipe) id: string,
+    @Request() req,
+  ): Promise<ICommentLikes> {
     return await this.commentsService.increaseLikes(id, req.user._id)
   }
 
   @Get(':id')
-  async findOneById(@Param('id', ObjectIdPipe) id: string) {
+  async findOneById(@Param('id', ObjectIdPipe) id: string): Promise<Comment> {
     return await this.commentsService.findOneById(id)
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('save')
-  async create(@Request() req, @Body() createCommentDto: CreateCommentsDto) {
+  async create(
+    @Request() req,
+    @Body() createCommentDto: CreateCommentsDto,
+  ): Promise<OperationEntity> {
     await this.commentsService.create(req.user._id, createCommentDto)
-    return { message: '评论成功' }
+    return new OperationEntity('评论成功')
   }
 
   @UseGuards(JwtAuthGuard, UserChecker)
@@ -59,24 +68,26 @@ export class CommentsController {
   async update(
     @Body('id', ObjectIdPipe) id,
     @Body() updateCommentDto: UpdateCommentsDto,
-  ) {
+  ): Promise<OperationEntity> {
     console.log('更新评论id: ', id)
     await this.commentsService.update(id, updateCommentDto)
-    return { message: '更新评论成功' }
+    return new OperationEntity('更新评论成功')
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Delete('batchDelete')
-  async batchDeleteByIds(@Body('ids') ids: string[]) {
+  async batchDeleteByIds(@Body('ids') ids: string[]): Promise<OperationEntity> {
     await this.commentsService.batchDeleteByIds(ids)
-    return { message: '批量删除评论成功' }
+    return new OperationEntity('批量删除评论成功')
   }
 
   @UseGuards(JwtAuthGuard, UserChecker)
   @Delete(':id')
-  async deleteById(@Param('id', ObjectIdPipe) id: string) {
+  async deleteById(
+    @Param('id', ObjectIdPipe) id: string,
+  ): Promise<OperationEntity> {
     await this.commentsService.deleteById(id)
-    return { message: '删除评论成功' }
+    return new OperationEntity('删除评论成功')
   }
 }

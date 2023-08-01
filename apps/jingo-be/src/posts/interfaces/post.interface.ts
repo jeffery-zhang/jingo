@@ -5,3 +5,13 @@ export interface IPostsSearchParams extends ISearchParams {
   'subject._id': string
   'category._id': string
 }
+
+export interface IPostLikes {
+  _id: string
+  likes: string[]
+}
+
+export interface IPostPv {
+  _id: string
+  pv: number
+}

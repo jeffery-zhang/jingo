@@ -6,7 +6,11 @@ import { Model } from 'mongoose'
 import { MongoSearchConditions, TResponseSearchRecords } from '@jingo/utils'
 
 import { Post } from './schemas/post.schema'
-import { IPostsSearchParams } from './interfaces/post.interface'
+import {
+  IPostsSearchParams,
+  IPostLikes,
+  IPostPv,
+} from './interfaces/post.interface'
 import { CreatePostDto } from './dtos/create-post.dto'
 import { UpdatePostDto } from './dtos/update-post.dto'
 import { SubjectsService } from '../subjects/subjects.service'
@@ -15,6 +19,7 @@ import { Subject } from '../subjects/schemas/subject.schema'
 import { User } from '../users/schemas/user.schema'
 import { Category } from '../categories/schemas/category.schema'
 import { UsersService } from '../users/users.service'
+import { Cron } from '@nestjs/schedule'
 
 @Injectable()
 export class PostsService {
@@ -52,22 +57,18 @@ export class PostsService {
 
   private async getPv(postId: string): Promise<number> {
     const postPvId = `post_${postId}_pv`
-    let pv: number = await this.cacheManager.get(postPvId)
-    if (!pv) {
-      pv = (await this.findOneById(postId)).pv
-      await this.cacheManager.set(postPvId, pv)
-    }
-    return pv
+    return await this.cacheManager.wrap(
+      postPvId,
+      async () => (await this.findOneById(postId)).pv,
+    )
   }
 
   private async getLikes(postId: string): Promise<string[]> {
     const postLikesId = `post_${postId}_likes`
-    let likes: string[] = await this.cacheManager.get(postLikesId)
-    if (!likes) {
-      likes = (await this.findOneById(postId)).likes
-      await this.cacheManager.set(postLikesId, likes)
-    }
-    return likes
+    return await this.cacheManager.wrap(
+      postLikesId,
+      async () => (await this.findOneById(postId)).likes,
+    )
   }
 
   async getAllCount(): Promise<number> {
@@ -88,6 +89,7 @@ export class PostsService {
       .limit(pager.pageSize)
       .sort(sorter)
       .select('-content')
+      .lean()
 
     const total = query.length
     const totalPage = Math.ceil(
@@ -120,12 +122,14 @@ export class PostsService {
     const category = await this.getCategory(createPostDto.categoryId)
     const subject = await this.getSubject(category.parent._id)
 
-    return await this.postModel.create({
-      ...createPostDto,
-      author,
-      subject,
-      category,
-    })
+    return (
+      await this.postModel.create({
+        ...createPostDto,
+        author,
+        subject,
+        category,
+      })
+    ).toObject()
   }
 
   async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
@@ -143,7 +147,7 @@ export class PostsService {
     return await this.postModel.findByIdAndUpdate(id, dto, { new: true }).lean()
   }
 
-  async deleteById(id: string) {
+  async deleteById(id: string): Promise<Post> {
     return await this.postModel.findByIdAndDelete(id)
   }
 
@@ -151,25 +155,71 @@ export class PostsService {
     return await this.postModel.deleteMany({ _id: { $in: ids } })
   }
 
-  async increasePv(id: string): Promise<{ _id: string; pv: number }> {
+  async increasePv(id: string): Promise<IPostPv> {
     const pv = await this.getPv(id)
     await this.cacheManager.set(`post_${id}_pv`, pv + 1)
+    const result = await this.cacheManager.get<number>(`post_${id}_pv`)
     return {
       _id: id,
-      pv: pv + 1,
+      pv: result,
     }
   }
 
-  async increaseLikes(
-    id: string,
-    userId: string,
-  ): Promise<{ _id: string; likes: string[] }> {
+  async increaseLikes(id: string, userId: string): Promise<IPostLikes> {
     const likes = await this.getLikes(id)
+    if (likes.includes(userId)) throw new BadRequestException('不能重复点赞')
     likes.push(userId)
     await this.cacheManager.set(`post_${id}_likes`, likes)
     return {
       _id: id,
       likes,
     }
+  }
+
+  async getAllPvsAndLikesFromCache(): Promise<{
+    pvs: { [key: string]: number }
+    likes: { [key: string]: string[] }
+  }> {
+    const keys = await this.cacheManager.store.keys()
+    const pvs = {}
+    const likes = {}
+    for (const key of keys) {
+      if (key.startsWith('post_') && key.endsWith('_pv')) {
+        const id = key.split('_')[1]
+        pvs[id] = await this.cacheManager.get<number>(key)
+      }
+      if (key.startsWith('post_') && key.endsWith('_likes')) {
+        const id = key.split('_')[1]
+        likes[id] = await this.cacheManager.get<string[]>(key)
+      }
+    }
+
+    return {
+      pvs,
+      likes,
+    }
+  }
+
+  async updateCacheToDb() {
+    const { pvs, likes } = await this.getAllPvsAndLikesFromCache()
+    const ids = [...new Set([...Object.keys(pvs), ...Object.keys(likes)])].map(
+      (i) => i,
+    )
+    if (ids.length === 0) return
+    const bulkWrites = ids.map((id) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: {
+          pv: pvs[id],
+          likes: likes[id],
+        },
+      },
+    }))
+    await this.postModel.bulkWrite(bulkWrites)
+  }
+
+  @Cron('0/10 * * * * *')
+  async handleCron() {
+    await this.updateCacheToDb()
   }
 }

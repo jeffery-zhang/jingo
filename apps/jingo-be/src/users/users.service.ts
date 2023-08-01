@@ -1,10 +1,12 @@
 import { Injectable, ForbiddenException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
+import { MongoSearchConditions, TResponseSearchRecords } from '@jingo/utils'
 
 import { User } from './schemas/user.schema'
 import { RegisterDto } from '../auth/dtos/register.dto'
 import { UpdateDto } from './dtos/update.dto'
+import { IUsersSearchParams } from './interfaces/user.interface'
 
 @Injectable()
 export class UsersService {
@@ -12,6 +14,33 @@ export class UsersService {
 
   async getAllCount(): Promise<number> {
     return await this.userModel.estimatedDocumentCount()
+  }
+
+  async search(params: IUsersSearchParams): Promise<TResponseSearchRecords> {
+    const { conditions, pager, sorter } = new MongoSearchConditions(params, {
+      sortBy: params.sortBy || 'createTime',
+      keywords: ['username', 'mail'],
+    })
+
+    const query = await this.userModel
+      .find(conditions)
+      .skip(pager.skipCount)
+      .limit(pager.pageSize)
+      .sort(sorter)
+      .lean()
+
+    const total = query.length
+    const totalPage = Math.ceil(
+      total / (pager.pageSize === 0 ? 1 : pager.pageSize),
+    )
+
+    return {
+      page: pager.page,
+      pageSize: pager.pageSize,
+      total,
+      totalPage,
+      records: query,
+    }
   }
 
   async findAll(): Promise<User[]> {
@@ -31,7 +60,7 @@ export class UsersService {
   }
 
   async create(registerDto: RegisterDto): Promise<User> {
-    return await this.userModel.create(registerDto)
+    return (await this.userModel.create(registerDto)).toObject()
   }
 
   async update(id: string, updateDto: UpdateDto): Promise<User> {
@@ -51,6 +80,10 @@ export class UsersService {
         { new: true },
       )
       .lean()
+  }
+
+  async deleteById(id: string) {
+    return await this.userModel.findByIdAndDelete(id)
   }
 
   public async validateUsernameAndMail(

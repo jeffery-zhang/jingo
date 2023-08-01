@@ -34,6 +34,7 @@ export class SubjectsService {
       .skip(pager.skipCount)
       .limit(pager.pageSize)
       .sort(sorter)
+      .lean()
 
     const total = query.length
     const totalPage = Math.ceil(
@@ -62,7 +63,7 @@ export class SubjectsService {
   }
 
   async create(createDto: CreateSubjectDto): Promise<Subject> {
-    return await this.subjectModel.create(createDto)
+    return (await this.subjectModel.create(createDto)).toObject()
   }
 
   async update(id: string, updateDto: UpdateSubjectDto): Promise<Subject> {
@@ -79,7 +80,7 @@ export class SubjectsService {
       .lean()
   }
 
-  async deleteById(id: string) {
+  async deleteById(id: string): Promise<Subject> {
     return await this.subjectModel.findByIdAndDelete(id)
   }
 
