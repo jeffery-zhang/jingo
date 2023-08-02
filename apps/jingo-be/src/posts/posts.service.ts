@@ -24,12 +24,16 @@ import { Cron } from '@nestjs/schedule'
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectModel('Post') private readonly postModel: Model<Post>,
+    @InjectModel(Post.name) private readonly postModel: Model<Post>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly usersService: UsersService,
     private readonly subjectsService: SubjectsService,
     private readonly categoriesService: CategoriesService,
   ) {}
+
+  private pvKey = 'post_pv_'
+
+  private likeKey = 'post_like_'
 
   private async getAuthor(id: string): Promise<User> {
     try {
@@ -55,19 +59,19 @@ export class PostsService {
     }
   }
 
-  private async getPv(postId: string): Promise<number> {
-    const postPvId = `post_${postId}_pv`
+  private async getPv(id: string): Promise<number> {
+    const key = this.pvKey + id
     return await this.cacheManager.wrap(
-      postPvId,
-      async () => (await this.findOneById(postId)).pv,
+      key,
+      async () => (await this.findOneById(id)).pv,
     )
   }
 
-  private async getLikes(postId: string): Promise<string[]> {
-    const postLikesId = `post_${postId}_likes`
+  private async getLikes(id: string): Promise<string[]> {
+    const key = this.likeKey + id
     return await this.cacheManager.wrap(
-      postLikesId,
-      async () => (await this.findOneById(postId)).likes,
+      key,
+      async () => (await this.findOneById(id)).likes,
     )
   }
 
@@ -157,8 +161,9 @@ export class PostsService {
 
   async increasePv(id: string): Promise<IPostPv> {
     const pv = await this.getPv(id)
-    await this.cacheManager.set(`post_${id}_pv`, pv + 1)
-    const result = await this.cacheManager.get<number>(`post_${id}_pv`)
+    const key = this.pvKey + id
+    await this.cacheManager.set(key, pv + 1)
+    const result = await this.cacheManager.get<number>(key)
     return {
       _id: id,
       pv: result,
@@ -167,9 +172,10 @@ export class PostsService {
 
   async increaseLikes(id: string, userId: string): Promise<IPostLikes> {
     const likes = await this.getLikes(id)
+    const key = this.likeKey + id
     if (likes.includes(userId)) throw new BadRequestException('不能重复点赞')
     likes.push(userId)
-    await this.cacheManager.set(`post_${id}_likes`, likes)
+    await this.cacheManager.set(key, likes)
     return {
       _id: id,
       likes,
@@ -181,15 +187,17 @@ export class PostsService {
     likes: { [key: string]: string[] }
   }> {
     const keys = await this.cacheManager.store.keys()
+    const pvKey = this.pvKey
+    const likeKey = this.likeKey
     const pvs = {}
     const likes = {}
     for (const key of keys) {
-      if (key.startsWith('post_') && key.endsWith('_pv')) {
-        const id = key.split('_')[1]
+      if (key.startsWith(pvKey)) {
+        const id = key.split('_')[2]
         pvs[id] = await this.cacheManager.get<number>(key)
       }
-      if (key.startsWith('post_') && key.endsWith('_likes')) {
-        const id = key.split('_')[1]
+      if (key.startsWith(likeKey)) {
+        const id = key.split('_')[2]
         likes[id] = await this.cacheManager.get<string[]>(key)
       }
     }
@@ -218,7 +226,7 @@ export class PostsService {
     await this.postModel.bulkWrite(bulkWrites)
   }
 
-  @Cron('0/10 * * * * *')
+  @Cron('0 0,30 * * * *')
   async handleCron() {
     await this.updateCacheToDb()
   }

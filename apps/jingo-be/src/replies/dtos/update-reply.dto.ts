@@ -6,7 +6,7 @@ import {
   IsNotEmpty,
 } from 'class-validator'
 
-export class UpdateCommentDto {
+export class UpdateReplyDto {
   @IsNotEmpty()
   @IsString()
   public readonly id: string

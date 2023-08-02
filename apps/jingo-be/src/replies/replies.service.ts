@@ -5,28 +5,27 @@ import { Cache } from 'cache-manager'
 import { Model } from 'mongoose'
 import { MongoSearchConditions, TResponseSearchRecords } from '@jingo/utils'
 
-import { Comment } from './schemas/comment.schema'
-import { CreateCommentDto } from './dtos/create-comment.dto'
-import { UpdateCommentDto } from './dtos/update-comment.dto'
-import { PostsService } from '../posts/posts.service'
+import { Reply } from './schemas/reply.schema'
+import { Comment } from '../comments/schemas/comment.schema'
+import { CreateReplyDto } from './dtos/create-reply.dto'
+import { UpdateReplyDto } from './dtos/update-reply.dto'
+import { CommentsService } from '../comments/comments.service'
 import { User } from '../users/schemas/user.schema'
 import { UsersService } from '../users/users.service'
-import {
-  ICommentsSearchParams,
-  ICommentLikes,
-} from './interfaces/comment.interface'
+import { IRepliesSearchParams, IReplyLikes } from './interfaces/reply.interface'
 import { Cron } from '@nestjs/schedule'
+import { ReplyType } from './entities/reply-type.entity'
 
 @Injectable()
-export class CommentsService {
+export class RepliesService {
   constructor(
-    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
+    @InjectModel(Reply.name) private readonly replyModel: Model<Reply>,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly usersService: UsersService,
-    private readonly postsService: PostsService,
+    private readonly commentsService: CommentsService,
   ) {}
 
-  private likeKey = 'comment_like_'
+  private likeKey = 'reply_like_'
 
   private async getAuthor(id: string): Promise<User> {
     try {
@@ -36,13 +35,21 @@ export class CommentsService {
     }
   }
 
-  private async validdatePost(id: string): Promise<boolean> {
-    try {
-      await this.postsService.findOneById(id)
-      return true
-    } catch (err) {
-      throw new BadRequestException('未找到文章')
+  private async getReplyTo(
+    id: string,
+    type: ReplyType,
+  ): Promise<Comment | Reply> {
+    let result: Comment | Reply | null = null
+    if (type === 'reply') {
+      result = await this.findOneById(id)
     }
+    if (type === 'comment') {
+      result = await this.commentsService.findOneById(id)
+    }
+    if (!result) {
+      throw new BadRequestException('未找到回复对象')
+    }
+    return result
   }
 
   private async getLikes(id: string): Promise<string[]> {
@@ -54,18 +61,18 @@ export class CommentsService {
   }
 
   async getAllCount(): Promise<number> {
-    return await this.commentModel.estimatedDocumentCount()
+    return await this.replyModel.estimatedDocumentCount()
   }
 
   async search(
-    params: ICommentsSearchParams,
-  ): Promise<TResponseSearchRecords<Comment>> {
+    params: IRepliesSearchParams,
+  ): Promise<TResponseSearchRecords<Reply>> {
     const { conditions, pager, sorter } = new MongoSearchConditions(params, {
       sortBy: params.sortBy || 'createTime',
       keywords: ['content'],
     })
 
-    const query = await this.commentModel
+    const query = await this.replyModel
       .find(conditions)
       .skip(pager.skipCount)
       .limit(pager.pageSize)
@@ -85,51 +92,53 @@ export class CommentsService {
     }
   }
 
-  async findOneById(id: string): Promise<Comment> {
-    return this.commentModel.findById(id).lean()
+  async findOneById(id: string): Promise<Reply> {
+    return this.replyModel.findById(id).lean()
   }
 
-  async create(
-    userId: string,
-    createCommentDto: CreateCommentDto,
-  ): Promise<Comment> {
-    await this.validdatePost(createCommentDto.postId)
+  async create(userId: string, createReplyDto: CreateReplyDto): Promise<Reply> {
+    const replyTo = await this.getReplyTo(
+      createReplyDto.fatherId,
+      createReplyDto.replyType,
+    )
     const author = await this.getAuthor(userId)
 
     return (
-      await this.commentModel.create({
-        ...createCommentDto,
+      await this.replyModel.create({
+        ...createReplyDto,
         author,
+        replyTo: {
+          _id: replyTo._id,
+          type: createReplyDto.replyType,
+          content: replyTo.content,
+        },
       })
     ).toObject()
   }
 
-  async update(
-    id: string,
-    updateCommentDto: UpdateCommentDto,
-  ): Promise<Comment> {
-    if (!updateCommentDto.content) {
+  async update(id: string, updateReplyDto: UpdateReplyDto): Promise<Reply> {
+    if (!updateReplyDto.content) {
       throw new BadRequestException('更新内容不能为空')
     }
     const updateTime = new Date()
     const dto: any = {
-      content: updateCommentDto.content,
+      content: updateReplyDto.content,
       updateTime,
     }
-    return await this.commentModel
+    return await this.replyModel
       .findByIdAndUpdate(id, dto, { new: true })
       .lean()
   }
 
-  async deleteById(id: string): Promise<Comment> {
-    return await this.commentModel.findByIdAndDelete(id)
+  async deleteById(id: string): Promise<Reply> {
+    return await this.replyModel.findByIdAndDelete(id)
   }
 
   async batchDeleteByIds(ids: string[]): Promise<any> {
-    return await this.commentModel.deleteMany({ _id: { $in: ids } })
+    return await this.replyModel.deleteMany({ _id: { $in: ids } })
   }
 
-  async increaseLikes(id: string, userId: string): Promise<ICommentLikes> {
+  async increaseLikes(id: string, userId: string): Promise<IReplyLikes> {
     const likes = await this.getLikes(id)
     const key = this.likeKey + id
     if (likes.includes(userId)) throw new BadRequestException('不能重复点赞')
@@ -167,10 +176,10 @@ export class CommentsService {
         },
       },
     }))
-    await this.commentModel.bulkWrite(bulkWrites)
+    await this.replyModel.bulkWrite(bulkWrites)
   }
 
-  @Cron('0 10,40 * * * *')
+  @Cron('0 20,50 * * * *')
   async handleCron() {
     await this.updateCacheToDb()
   }

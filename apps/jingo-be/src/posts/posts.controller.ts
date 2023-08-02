@@ -47,10 +47,10 @@ export class PostsController {
     return Object.assign(post, { pv })
   }
 
-  @Get('pv/:id')
-  async increasePv(@Param('id', ObjectIdPipe) id: string): Promise<IPostPv> {
-    return await this.postsService.increasePv(id)
-  }
+  // @Get('pv/:id')
+  // async increasePv(@Param('id', ObjectIdPipe) id: string): Promise<IPostPv> {
+  //   return await this.postsService.increasePv(id)
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Get('like/:id')

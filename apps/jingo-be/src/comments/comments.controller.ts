@@ -14,8 +14,8 @@ import { TResponseSearchRecords } from '@jingo/utils'
 
 import { CommentsService } from './comments.service'
 import { ObjectIdPipe } from '../shared/pipes/object-id.pipe'
-import { CreateCommentsDto } from './dtos/create-comment.dto'
-import { UpdateCommentsDto } from './dtos/update-comment.dto'
+import { CreateCommentDto } from './dtos/create-comment.dto'
+import { UpdateCommentDto } from './dtos/update-comment.dto'
 import { JwtAuthGuard } from '../auth/jwt.stradegy'
 import { UserChecker } from './guards/user-checker.guard'
 import { Roles } from '../roles/role.decorator'
@@ -57,7 +57,7 @@ export class CommentsController {
   @Post('save')
   async create(
     @Request() req,
-    @Body() createCommentDto: CreateCommentsDto,
+    @Body() createCommentDto: CreateCommentDto,
   ): Promise<OperationEntity> {
     await this.commentsService.create(req.user._id, createCommentDto)
     return new OperationEntity('评论成功')
@@ -67,9 +67,8 @@ export class CommentsController {
   @Put('save')
   async update(
     @Body('id', ObjectIdPipe) id,
-    @Body() updateCommentDto: UpdateCommentsDto,
+    @Body() updateCommentDto: UpdateCommentDto,
   ): Promise<OperationEntity> {
-    console.log('更新评论id: ', id)
     await this.commentsService.update(id, updateCommentDto)
     return new OperationEntity('更新评论成功')
   }

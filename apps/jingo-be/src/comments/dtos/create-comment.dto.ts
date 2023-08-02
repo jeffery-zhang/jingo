@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator'
 
-export class CreateCommentsDto {
+export class CreateCommentDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(1)

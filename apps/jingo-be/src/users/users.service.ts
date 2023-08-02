@@ -10,7 +10,7 @@ import { IUsersSearchParams } from './interfaces/user.interface'
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async getAllCount(): Promise<number> {
     return await this.userModel.estimatedDocumentCount()

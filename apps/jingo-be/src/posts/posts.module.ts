@@ -13,7 +13,7 @@ import { PostsService } from './posts.service'
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     CacheModule.register({
-      ttl: 1000 * 60 * 30,
+      ttl: 1000 * 60 * 60,
     }),
     UsersModule,
     SubjectsModule,

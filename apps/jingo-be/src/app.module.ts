@@ -10,6 +10,7 @@ import { SubjectsModule } from './subjects/subjects.module'
 import { CategoriesModule } from './categories/categories.module'
 import { PostsModule } from './posts/posts.module'
 import { CommentsModule } from './comments/comments.module'
+import { RepliesModule } from './replies/replies.module'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CommentsModule } from './comments/comments.module'
     CategoriesModule,
     PostsModule,
     CommentsModule,
+    RepliesModule,
   ],
   controllers: [AppController],
 })
