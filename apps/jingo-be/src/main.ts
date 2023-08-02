@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import helmet from 'helmet'
+import compression from 'compression'
 
 import { AppModule } from './app.module'
 import { GlobalExceptionFilter } from './shared/filters/exception.filter'
@@ -20,6 +21,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter())
   app.useGlobalInterceptors(new BodyInterceptor())
   app.use(helmet())
+  app.use(compression())
 
   await app.listen(4444)
 }
