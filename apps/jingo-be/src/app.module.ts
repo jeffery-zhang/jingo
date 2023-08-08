@@ -11,6 +11,7 @@ import { CategoriesModule } from './categories/categories.module'
 import { PostsModule } from './posts/posts.module'
 import { CommentsModule } from './comments/comments.module'
 import { RepliesModule } from './replies/replies.module'
+import { ObsModule } from './obs/obs.module'
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RepliesModule } from './replies/replies.module'
     PostsModule,
     CommentsModule,
     RepliesModule,
+    ObsModule,
   ],
   controllers: [AppController],
 })
