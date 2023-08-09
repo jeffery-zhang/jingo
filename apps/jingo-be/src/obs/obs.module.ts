@@ -12,5 +12,6 @@ import { ObsService } from './obs.service'
   ],
   providers: [ObsService],
   controllers: [ObsController],
+  exports: [ObsService],
 })
 export class ObsModule {}

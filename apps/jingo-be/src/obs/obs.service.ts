@@ -1,4 +1,4 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common'
+import { Injectable, BadRequestException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { HttpService } from '@nestjs/axios'
 import { createHash } from 'crypto'
@@ -19,7 +19,6 @@ export class ObsService {
   }
 
   private generateHashFilename(file: Express.Multer.File) {
-    console.log(file)
     file.originalname = Buffer.from(file.originalname, 'latin1').toString(
       'utf-8',
     )
@@ -29,7 +28,7 @@ export class ObsService {
     return `${hashFilename}${ext}`
   }
 
-  async uploadFile(file: Express.Multer.File) {
+  async uploadFile(file: Express.Multer.File): Promise<string> {
     const filename = this.generateHashFilename(file)
     const url = `${this.obsPath}/${filename}`
     const body = file.buffer
@@ -37,10 +36,26 @@ export class ObsService {
       'X-Custom-Auth-Key': this.obsAuthKey,
     }
 
-    const res = this.httpService
-      .put(url, body, { headers })
-      .subscribe((value) => {
-        console.log('worker response: ', value)
-      })
+    try {
+      const res = await this.httpService.put(url, body, { headers }).toPromise()
+      if (res.status === 200) {
+        return url
+      }
+    } catch (err) {
+      throw new BadRequestException('上传失败')
+    }
+  }
+
+  async deleteByKey(key: string): Promise<void> {
+    const url = `${this.obsPath}/${key}`
+    const headers = {
+      'X-Custom-Auth-Key': this.obsAuthKey,
+    }
+
+    try {
+      await this.httpService.delete(url, { headers }).toPromise()
+    } catch (err) {
+      throw new BadRequestException('删除失败')
+    }
   }
 }
