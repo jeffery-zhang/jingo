@@ -1,0 +1,8 @@
+{
+  "extends": "@jingo/tsconfig/base.json",
+  "include": ["."],
+  "exclude": ["node_modules", "build"],
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}

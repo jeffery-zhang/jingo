@@ -9,7 +9,7 @@
     "dev": "tsc -w",
     "build": "tsc"
   },
-  "author": "jeffery-zhang",
+  "author": "jingo",
   "devDependencies": {
     "@jingo/eslint-config": "workspace:^",
     "@jingo/tsconfig": "workspace:^",

@@ -2,7 +2,7 @@
   "name": "@jingo/eslint-config",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "jeffery-zhang",
+  "author": "jingo",
   "scripts": {
     "clean": "rm -rf node_modules"
   },

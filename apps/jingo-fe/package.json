@@ -11,6 +11,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@jingo/icons": "workspace:^",
     "@jingo/utils": "workspace:^",
     "axios": "^1.4.0",
     "next": "13.4.13",

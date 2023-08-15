@@ -1,4 +1,5 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios'
+import { cookies } from 'next/headers'
 
 import { TResponse } from '../types/common'
 
@@ -18,7 +19,7 @@ const fetcher = axios.create({
 const requestInterceptor = (config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
     config.baseURL = clientSideUrl
-    const token = window.localStorage.getItem('token')
+    const token = cookies().get('token')
     token &&
       config.headers &&
       (config.headers.Authorization = `Bearer ${token}`)

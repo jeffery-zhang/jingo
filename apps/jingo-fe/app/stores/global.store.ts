@@ -1,19 +1,17 @@
 import { create } from 'zustand'
 
+export enum Theme {
+  'EMERALD' = 'emerald',
+  'FOREST' = 'forest',
+}
+
 interface IGlobalStore {
-  theme: 'emerald' | 'forest'
+  theme: Theme
   setTheme: (theme: IGlobalStore['theme']) => void
 }
 
-const initialTheme = () => {
-  if (typeof window !== 'undefined') {
-    return window.localStorage.getItem('theme') || 'emerald'
-  }
-  return 'emerald'
-}
-
 export const useGlobalStore = create<IGlobalStore>((set, get) => ({
-  theme: initialTheme() as IGlobalStore['theme'],
+  theme: Theme.EMERALD,
   setTheme(theme) {
     if (get().theme === theme) return
     if (typeof window !== 'undefined') {

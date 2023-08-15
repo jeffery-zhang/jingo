@@ -1,4 +1,4 @@
-import { ISearchParams, TResponseSearchRecords } from '@jingo/utils'
+import { TResponseSearchRecords } from '@jingo/utils'
 
 import { fetcher } from './fetcher'
 import { TResponse } from '../types/common'

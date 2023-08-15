@@ -9,7 +9,7 @@
     "lint": "turbo run lint",
     "build": "turbo run build"
   },
-  "author": "jeffery-zhang",
+  "author": "jingo",
   "license": "MIT",
   "devDependencies": {
     "@jingo/eslint-config": "workspace:^",
