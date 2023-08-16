@@ -13,7 +13,7 @@ export const ToggleTheme: FC = () => {
 
   const initTheme = () => {
     const storedTheme = window.localStorage.getItem('theme') as typeof theme
-    if (!storedTheme) setTheme(theme)
+    if (!storedTheme) setTheme(Theme.EMERALD)
     else setTheme(storedTheme)
   }
 
@@ -26,12 +26,18 @@ export const ToggleTheme: FC = () => {
   }, [])
 
   return (
-    <div className='cursor-pointer'>
-      {theme === Theme.EMERALD ? (
-        <SunIcon className='w-6 h-6' onClick={toggle} />
-      ) : (
-        <MoonIcon className='w-6 h-6' onClick={toggle} />
-      )}
+    <div className='swap swap-rotate'>
+      <input type='checkbox' />
+      <SunIcon
+        className={`${
+          theme === Theme.EMERALD ? 'swap-off' : 'swap-on'
+        } w-6 h-6`}
+        onClick={toggle}
+      />
+      <MoonIcon
+        className={`${theme === Theme.FOREST ? 'swap-off' : 'swap-on'} w-6 h-6`}
+        onClick={toggle}
+      />
     </div>
   )
 }

@@ -12,5 +12,5 @@ export const login = async (data: ILoginParams): Promise<TResponse<IUser>> =>
     data,
   })
 
-export const verify = async (): Promise<TResponse<IUser>> =>
+export const verify = async (): Promise<TResponse<IUser | null>> =>
   fetcher.get(paths.verify)

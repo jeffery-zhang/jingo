@@ -22,7 +22,7 @@ export class BodyInterceptor implements NestInterceptor {
         const success = status >= 200 && status < 300
         const getResponseMessage = () => {
           if (res.message) return res.message
-          return data.message ?? ''
+          return data?.message ?? ''
         }
         return new ResponseBody(success, getResponseMessage(), status, data)
       }),

@@ -1,10 +1,9 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios'
-import { cookies } from 'next/headers'
 
 import { TResponse } from '../types/common'
 
 const serverSideUrl = process.env.SERVER_URL
-const clientSideUrl = process.env.CLIENT_URL
+const clientSideUrl = process.env.NEXT_PUBLIC_CLIENT_URL
 
 const fetcher = axios.create({
   baseURL: serverSideUrl,
@@ -19,10 +18,10 @@ const fetcher = axios.create({
 const requestInterceptor = (config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
     config.baseURL = clientSideUrl
-    const token = cookies().get('token')
-    token &&
-      config.headers &&
-      (config.headers.Authorization = `Bearer ${token}`)
+    const token = window.localStorage.getItem('token')
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
   } else {
     config.baseURL = serverSideUrl
   }

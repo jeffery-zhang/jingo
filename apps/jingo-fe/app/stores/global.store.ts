@@ -15,7 +15,6 @@ export const useGlobalStore = create<IGlobalStore>((set, get) => ({
   setTheme(theme) {
     if (get().theme === theme) return
     if (typeof window !== 'undefined') {
-      console.log(theme)
       window.localStorage.setItem('theme', theme)
       window.document.documentElement.setAttribute('data-theme', theme)
     }
