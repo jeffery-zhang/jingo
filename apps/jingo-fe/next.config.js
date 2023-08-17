@@ -11,14 +11,15 @@ const nextConfig = {
   },
   // 将packages中的自定义包加入nextjs的构建步骤
   transpilePackages: ['@jingo/icons'],
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${serverSideUrl}/:path*`,
-      },
-    ]
-  },
+  // 使用api路由可以替代rewrites配置
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: `${serverSideUrl}/:path*`,
+  //     },
+  //   ]
+  // },
 }
 
 module.exports = nextConfig

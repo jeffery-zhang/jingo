@@ -1,5 +1,3 @@
-import './iconfont.js'
-
 import { Icon } from './components/Icon'
 
 export { SunIcon } from './components/SunIcon'

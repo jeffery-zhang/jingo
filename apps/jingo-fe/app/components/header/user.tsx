@@ -12,7 +12,7 @@ export const User: FC = () => {
   }))
 
   useEffect(() => {
-    if (verify) {
+    if (verify && window.localStorage.getItem('token')) {
       verify()
     }
   }, [verify])
@@ -29,7 +29,9 @@ export const User: FC = () => {
             tabIndex={0}
             className='flex items-center cursor-pointer'
           >
-            <span className='text-sm pr-1'>{user?.username}</span>
+            <span className='text-sm pr-1 whitespace-nowrap'>
+              {user?.username}
+            </span>
             {user?.avatar ? (
               <div className='avatar'>
                 <div className='w-8'>
@@ -44,7 +46,7 @@ export const User: FC = () => {
             ) : (
               <div className='avatar placeholder'>
                 <div className='bg-neutral text-neutral-content rounded-full w-8'>
-                  <span className='text-xl'>
+                  <span className='text-xl whitespace-nowrap'>
                     {user?.username.slice(0, 1).toUpperCase()}
                   </span>
                 </div>
@@ -65,8 +67,11 @@ export const User: FC = () => {
           </ul>
         </div>
       ) : (
-        <div className='flex items-center'>
-          <span className='text-sm pr-1'>请登录</span>
+        <div
+          className='flex items-center'
+          onClick={() => window['login-form']?.showModal()}
+        >
+          <span className='text-sm pr-1 whitespace-nowrap'>请登录</span>
           <UserIcon className='w-6 h-6' />
         </div>
       )}

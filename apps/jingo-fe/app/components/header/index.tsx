@@ -4,6 +4,7 @@ import { Logo } from './logo'
 import { Menu } from './menu'
 import { ToggleTheme } from './toggleTheme'
 import { User } from './user'
+import { DrawerMenu } from './drawerMenu'
 
 export const Header: FC = () => {
   return (
@@ -14,6 +15,7 @@ export const Header: FC = () => {
         <div className='flex'>
           <ToggleTheme />
           <User />
+          <DrawerMenu />
         </div>
       </div>
     </header>
