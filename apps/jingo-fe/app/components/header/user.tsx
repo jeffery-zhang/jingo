@@ -69,7 +69,7 @@ export const User: FC = () => {
       ) : (
         <div
           className='flex items-center'
-          onClick={() => window['login-form']?.showModal()}
+          onClick={() => (window as any)['login-form']?.showModal()}
         >
           <span className='text-sm pr-1 whitespace-nowrap'>请登录</span>
           <UserIcon className='w-6 h-6' />
