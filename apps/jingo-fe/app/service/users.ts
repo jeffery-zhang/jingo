@@ -8,9 +8,7 @@ const paths = {
 }
 
 export const login = async (data: ILoginParams): Promise<TResponse<IUser>> =>
-  fetcher.post(paths.login, {
-    data,
-  })
+  fetcher.post(paths.login, data)
 
 export const verify = async (): Promise<TResponse<IUser | null>> =>
   fetcher.get(paths.verify)

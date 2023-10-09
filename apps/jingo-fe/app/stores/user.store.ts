@@ -6,7 +6,12 @@ import { login, verify } from '../service/users'
 interface IUserStore {
   isLogged: boolean
   user: null | IUser
-  login: (username: string, password: string) => Promise<void>
+  login: (
+    username: string,
+    password: string,
+    onSuccess?: () => void,
+    onFailed?: () => void,
+  ) => Promise<void>
   verify: () => Promise<void>
   logout: () => void
 }
@@ -14,19 +19,23 @@ interface IUserStore {
 const removeTokenFromLocalStorage = () => {
   if (typeof window !== 'undefined') {
     window.localStorage.removeItem('token')
+    window.location.reload()
   }
 }
 
 export const useUserStore = create<IUserStore>((set) => ({
   isLogged: false,
   user: null,
-  async login(username, password) {
+  async login(username, password, onSuccess, onFailed) {
     const { data: user, success } = await login({ username, password })
     if (success) {
       set({ user, isLogged: true })
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('token', user.token!)
       }
+      onSuccess?.()
+    } else {
+      onFailed?.()
     }
   },
   async verify() {

@@ -41,9 +41,7 @@ const reducer = (state: IState, action: TAction): IState => {
 }
 export const LoginForm: FC = () => {
   const closeRef = useRef<any>()
-  const { isLogged, login } = useUserStore((state) => ({
-    ...state,
-  }))
+  const login = useUserStore((state) => state.login)
   const [{ username, password, usernameError, passwordError }, dispatch] =
     useReducer<Reducer<IState, TAction>>(reducer, {
       username: '',
@@ -72,9 +70,11 @@ export const LoginForm: FC = () => {
 
   const handleSubmit: MouseEventHandler = async (e) => {
     e.preventDefault()
+    const onSuccess = () => {
+      if (closeRef.current) closeRef.current.click()
+    }
     if (!usernameError && !passwordError) {
-      await login(username, password)
-      if (closeRef.current && isLogged) closeRef.current.click()
+      await login(username, password, onSuccess)
     }
   }
 
@@ -90,7 +90,9 @@ export const LoginForm: FC = () => {
           </label>
           <input
             type='text'
-            className='input input-bordered w-full input-sm md:input-md'
+            className={`input input-bordered w-full input-sm md:input-md ${
+              usernameError && 'input-error'
+            }`}
             autoFocus
             value={username}
             onChange={setUsername}
@@ -102,7 +104,9 @@ export const LoginForm: FC = () => {
           </label>
           <input
             type='password'
-            className='input input-bordered w-full input-sm md:input-md'
+            className={`input input-bordered w-full input-sm md:input-md ${
+              passwordError && 'input-error'
+            }`}
             value={password}
             onChange={setPassword}
           />

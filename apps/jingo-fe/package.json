@@ -13,11 +13,13 @@
   "dependencies": {
     "@jingo/icons": "workspace:^",
     "@jingo/utils": "workspace:^",
+    "antd": "^5.9.4",
     "axios": "^1.4.0",
     "next": "13.4.13",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.3",
+    "uuid": "^9.0.0",
     "zustand": "^4.4.1"
   },
   "devDependencies": {
@@ -25,8 +27,9 @@
     "@types/node": "20.4.9",
     "@types/react": "18.2.20",
     "@types/react-dom": "18.2.7",
+    "@types/uuid": "^9.0.2",
     "autoprefixer": "10.4.14",
-    "daisyui": "^3.5.1",
+    "daisyui": "^3.9.2",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.13",
     "postcss": "8.4.27",

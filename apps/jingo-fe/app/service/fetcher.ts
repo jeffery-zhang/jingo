@@ -1,4 +1,5 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios'
+import { message } from 'antd'
 
 import { TResponse } from '../types/common'
 
@@ -10,7 +11,7 @@ const fetcher = axios.create({
   timeout: 30000,
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json;charset=UTF-8',
     'Access-Control-Allow-Origin': '*',
   },
 })
@@ -30,15 +31,13 @@ const requestInterceptor = (config: InternalAxiosRequestConfig) => {
 }
 
 const responseInterceptor = (response: AxiosResponse<TResponse<any>>) => {
-  if (response.status < 200 || response.status >= 300)
-    return {
-      success: false,
-      status: response.status,
-      message: '网络请求异常',
-      data: [],
-    }
+  const data = response.data
 
-  return response.data
+  if (!data.success) {
+    message.error(data.message || '网络请求错误')
+  }
+
+  return data
 }
 
 fetcher.interceptors.request.use(requestInterceptor)
