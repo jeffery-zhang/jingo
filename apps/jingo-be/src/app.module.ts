@@ -23,6 +23,7 @@ import { ObsModule } from './obs/obs.module'
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get('DB_FULLPATH'),
+        dbName: 'jingo',
       }),
       inject: [ConfigService],
     }),
