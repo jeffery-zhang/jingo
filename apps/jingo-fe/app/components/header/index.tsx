@@ -1,6 +1,6 @@
 import { FC } from 'react'
 
-import { Logo } from './logo'
+import { Logo } from '../common/logo'
 import { Menu } from './menu'
 import { Search } from './search'
 import { ToggleTheme } from './toggleTheme'

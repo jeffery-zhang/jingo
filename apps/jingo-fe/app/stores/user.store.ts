@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { encryptPassword } from '@jingo/utils/src/encrypt'
 
 import { IUser } from '../types/users'
-import { login, verify } from '../service/users'
+import { login, verify } from '../service/auth'
 
 interface IUserStore {
   isLogged: boolean
@@ -28,7 +28,6 @@ export const useUserStore = create<IUserStore>((set) => ({
   isLogged: false,
   user: null,
   async login(username, password, onSuccess, onFailed) {
-    console.log(encryptPassword(password))
     const { data: user, success } = await login({
       username,
       password: encryptPassword(password),

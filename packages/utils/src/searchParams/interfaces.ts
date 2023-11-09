@@ -7,6 +7,13 @@ export interface ISearchParams {
   [key: string]: any
 }
 
+export type TResponse<T = any> = {
+  success: boolean
+  status: number
+  message: string
+  data: T
+}
+
 export type TResponseSearchRecords<T = any> = {
   page: number
   pageSize: number
@@ -14,3 +21,7 @@ export type TResponseSearchRecords<T = any> = {
   totalPage: number
   records: T[]
 }
+
+export type TResponseWithPagination<T = any> = TResponse<
+  TResponseSearchRecords<T>
+>

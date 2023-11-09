@@ -68,7 +68,7 @@ export class AuthService {
     if (!valid) return null
     const user = await this.userService.create({
       ...registerDto,
-      password: encryptPasswordForDb(realPwd),
+      password: realPwd,
     })
     const token = this.generateJwt(user)
     return Object.assign(user, { token })
@@ -76,16 +76,17 @@ export class AuthService {
 
   public async changePwd(id: string, oldPwd: string, newPwd: string) {
     if (!oldPwd || !newPwd) throw new BadRequestException('密码不能为空')
+    const realOldPwd = decryptPassword(oldPwd)
+    const realNewPwd = decryptPassword(newPwd)
     const user = await this.userService.findOneById(id)
-    if (!comparePasswords(oldPwd, user.password)) {
+    if (!comparePasswords(realOldPwd, user.password)) {
       throw new ForbiddenException('原密码不正确')
     }
-    if (comparePasswords(oldPwd, newPwd)) {
+    if (realOldPwd === realNewPwd) {
       throw new ForbiddenException('新旧密码不能一样')
     }
-    const realPwd = decryptPassword(newPwd)
     return await this.userService.update(id, {
-      password: encryptPasswordForDb(realPwd),
+      password: realNewPwd,
     })
   }
 }

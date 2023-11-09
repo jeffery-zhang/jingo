@@ -2,16 +2,11 @@
 
 import { FC, useState } from 'react'
 import { SearchIcon } from '@jingo/icons'
-import { encryptPassword, decryptPassword } from '@jingo/utils/src/encrypt'
 
 export const Search: FC = () => {
   const [value, setValue] = useState<string>('')
   const onSearch = () => {
-    console.log('search: ', encryptPassword('123123'))
-    console.log(
-      'search: ',
-      decryptPassword('U2FsdGVkX19NhJyCq93R9tt9+n5kIwlfch4/iymsyok='),
-    )
+    console.log('search: ', value)
   }
 
   return (

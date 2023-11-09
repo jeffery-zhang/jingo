@@ -49,6 +49,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message = getMongoExceptionMessage()
     }
 
-    response.status(status).json(new ResponseBody(false, message, status, []))
+    response.status(status).json(new ResponseBody(false, message, status, null))
   }
 }

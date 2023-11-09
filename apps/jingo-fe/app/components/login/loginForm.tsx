@@ -9,7 +9,7 @@ import {
   useRef,
 } from 'react'
 
-import { Logo } from '../header/logo'
+import { Logo } from '../common/logo'
 import { useUserStore } from '@/app/stores/user.store'
 
 interface IState {

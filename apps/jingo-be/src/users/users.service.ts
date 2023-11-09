@@ -16,7 +16,9 @@ export class UsersService {
     return await this.userModel.estimatedDocumentCount()
   }
 
-  async search(params: IUsersSearchParams): Promise<TResponseSearchRecords> {
+  async search(
+    params: IUsersSearchParams,
+  ): Promise<TResponseSearchRecords<User>> {
     const { conditions, pager, sorter } = new MongoSearchConditions(params, {
       sortBy: params.sortBy || 'createTime',
       keywords: ['username', 'mail'],

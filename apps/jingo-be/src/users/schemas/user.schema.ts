@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
+import { encryptPasswordForDb } from '@jingo/utils'
+
 import { Role } from '../../roles/role.enum'
 
 export type UserDocument = User & Document
@@ -29,3 +31,8 @@ export class User extends Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
+
+UserSchema.pre<User>('save', async function (next) {
+  this.password = encryptPasswordForDb(this.password)
+  next()
+})

@@ -1,10 +1,10 @@
 'use client'
 
 import { FC, useEffect } from 'react'
-import Image from 'next/image'
 import { UserIcon } from '@jingo/icons'
 
 import { useUserStore } from '@/app/stores/user.store'
+import { Avatar } from '../common/avatar'
 
 export const User: FC = () => {
   const { isLogged, user, logout, verify } = useUserStore((state) => ({
@@ -32,26 +32,7 @@ export const User: FC = () => {
             <span className='text-sm pr-1 whitespace-nowrap'>
               {user?.username}
             </span>
-            {user?.avatar ? (
-              <div className='avatar'>
-                <div className='w-8'>
-                  <Image
-                    src={user.avatar}
-                    fill
-                    alt='avatar'
-                    className='rounded-full'
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className='avatar placeholder'>
-                <div className='bg-neutral text-neutral-content rounded-full w-8'>
-                  <span className='text-xl whitespace-nowrap'>
-                    {user?.username.slice(0, 1).toUpperCase()}
-                  </span>
-                </div>
-              </div>
-            )}
+            <Avatar user={user!} />
           </label>
           <ul
             key='list'

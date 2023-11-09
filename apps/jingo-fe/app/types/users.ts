@@ -11,3 +11,16 @@ export interface IUser {
   roles: string[]
   token?: string
 }
+
+export interface IRegisterParams {
+  username: string
+  password: string
+  mail: string
+  avatar?: string
+  roles: string[]
+}
+
+export interface IChangePwdParams {
+  oldPwd: string
+  newPwd: string
+}
