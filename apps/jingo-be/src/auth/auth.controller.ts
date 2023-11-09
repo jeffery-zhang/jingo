@@ -14,6 +14,8 @@ import { AuthGuard } from '@nestjs/passport'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwt.stradegy'
 import { RegisterDto } from './dtos/register.dto'
+import { LoginDto } from './dtos/login.dto'
+import { ChangePwdDto } from './dtos/changePwd.dto'
 import { UserEntity } from '../users/entities/user.entity'
 import { OperationEntity } from '../shared/entities/operation.entity'
 
@@ -32,11 +34,8 @@ export class AuthController {
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  public async login(@Body() body): Promise<UserEntity> {
-    const user = await this.authService.login({
-      username: body.username,
-      password: body.password,
-    })
+  public async login(@Body() body: LoginDto): Promise<UserEntity> {
+    const user = await this.authService.login(body)
     return new UserEntity(user)
   }
 
@@ -51,10 +50,10 @@ export class AuthController {
   @Put('changePwd')
   public async changePwd(
     @Request() req,
-    @Body() body: { oldPwd: string; password: string },
+    @Body() body: ChangePwdDto,
   ): Promise<OperationEntity> {
     const id = req.user._id
-    await this.authService.changePwd(id, body.oldPwd, body.password)
+    await this.authService.changePwd(id, body.oldPwd, body.newPwd)
     return new OperationEntity('修改密码成功')
   }
 }

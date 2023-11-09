@@ -4,8 +4,11 @@ import {
   BadRequestException,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { compareSync } from 'bcrypt'
-import { encryptPassword } from '@jingo/utils'
+import {
+  comparePasswords,
+  decryptPassword,
+  encryptPasswordForDb,
+} from '@jingo/utils'
 
 import { UsersService } from '../users/users.service'
 import { RegisterDto } from './dtos/register.dto'
@@ -28,9 +31,11 @@ export class AuthService {
   }
 
   public async validateUser(username: string, password: string): Promise<User> {
+    const realPwd = decryptPassword(password)
+    console.log('validate user service: ', realPwd)
     const user = await this.userService.findOneByUsername(username)
     if (user) {
-      if (!compareSync(password, user.password)) {
+      if (!comparePasswords(realPwd, user.password)) {
         throw new BadRequestException('密码不正确')
       }
       return user
@@ -56,10 +61,15 @@ export class AuthService {
   public async register(
     registerDto: RegisterDto,
   ): Promise<User & { token: string }> {
-    const { username, mail } = registerDto
+    const { username, mail, password } = registerDto
+    const realPwd = decryptPassword(password)
+    console.log('register service: ', realPwd)
     const valid = await this.userService.validateUsernameAndMail(username, mail)
     if (!valid) return null
-    const user = await this.userService.create(registerDto)
+    const user = await this.userService.create({
+      ...registerDto,
+      password: encryptPasswordForDb(realPwd),
+    })
     const token = this.generateJwt(user)
     return Object.assign(user, { token })
   }
@@ -67,10 +77,15 @@ export class AuthService {
   public async changePwd(id: string, oldPwd: string, newPwd: string) {
     if (!oldPwd || !newPwd) throw new BadRequestException('密码不能为空')
     const user = await this.userService.findOneById(id)
-    if (!compareSync(oldPwd, user.password)) {
+    if (!comparePasswords(oldPwd, user.password)) {
       throw new ForbiddenException('原密码不正确')
     }
-    const password = await encryptPassword(newPwd)
-    return await this.userService.update(id, { password })
+    if (comparePasswords(oldPwd, newPwd)) {
+      throw new ForbiddenException('新旧密码不能一样')
+    }
+    const realPwd = decryptPassword(newPwd)
+    return await this.userService.update(id, {
+      password: encryptPasswordForDb(realPwd),
+    })
   }
 }

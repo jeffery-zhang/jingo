@@ -21,8 +21,6 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  @MaxLength(20)
-  @MinLength(6)
   public readonly password: string
 
   @IsEmail()

@@ -21,7 +21,7 @@ export default function RootLayout({
         <Header></Header>
         <LoginForm />
         {children}
-        <Script src='https://at.alicdn.com/t/c/font_4211111_3nuh2zp766y.js' />
+        <Script src='https://at.alicdn.com/t/c/font_4211111_01me12v5ra0f.js' />
       </body>
     </html>
   )

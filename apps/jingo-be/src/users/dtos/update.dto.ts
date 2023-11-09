@@ -21,8 +21,6 @@ export class UpdateDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(20)
-  @MinLength(6)
   public readonly password?: string
 
   @IsOptional()

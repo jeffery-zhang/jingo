@@ -9,5 +9,6 @@ export { SuccessIcon } from './components/SuccessIcon'
 export { InfoIcon } from './components/InfoIcon'
 export { WarningIcon } from './components/WarningIcon'
 export { ErrorIcon } from './components/ErrorIcon'
+export { SearchIcon } from './components/SearchIcon'
 
 export default Icon
