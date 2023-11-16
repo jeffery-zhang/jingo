@@ -3,7 +3,7 @@
 import { FC, useEffect } from 'react'
 import { UserIcon } from '@jingo/icons'
 
-import { useUserStore } from '@/app/stores/user.store'
+import { useUserStore } from '@/app/stores/auth.store'
 import { Avatar } from '../common/avatar'
 
 export const User: FC = () => {
@@ -40,7 +40,14 @@ export const User: FC = () => {
             className='dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52'
           >
             <li>
-              <a>个人信息</a>
+              <a onClick={() => (window as any)['personal-form']?.showModal()}>
+                个人信息
+              </a>
+            </li>
+            <li>
+              <a onClick={() => (window as any)['changePwd-form']?.showModal()}>
+                修改密码
+              </a>
             </li>
             <li>
               <a onClick={logout}>退出登录</a>

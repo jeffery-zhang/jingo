@@ -22,7 +22,7 @@ export const verify = async (): Promise<TResponse<IUser | null>> =>
 
 export const register = async (
   data: IRegisterParams,
-): Promise<TResponse<IUser | null>> => fetcher.post(paths.register, data)
+): Promise<TResponse<IUser>> => fetcher.post(paths.register, data)
 
 export const changePwd = async (data: IChangePwdParams): Promise<TResponse> =>
   fetcher.put(paths.changePwd, data)

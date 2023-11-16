@@ -11,7 +11,7 @@ const fetcher = axios.create({
   timeout: 30000,
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json;charset=UTF-8',
+    // 'Content-Type': 'application/json;charset=UTF-8',
     'Access-Control-Allow-Origin': '*',
   },
 })

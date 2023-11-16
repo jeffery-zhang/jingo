@@ -8,9 +8,9 @@ import {
   useReducer,
   useRef,
 } from 'react'
+import { message } from 'antd'
 
-import { Logo } from '../common/logo'
-import { useUserStore } from '@/app/stores/user.store'
+import { useUserStore } from '@/app/stores/auth.store'
 
 interface IState {
   username: string
@@ -24,6 +24,14 @@ type TAction =
   | { type: 'setPassword'; payload: string }
   | { type: 'setUsernameError'; payload: boolean }
   | { type: 'setPasswordError'; payload: boolean }
+  | { type: 'reset' }
+
+const initialState: IState = {
+  username: '',
+  password: '',
+  usernameError: false,
+  passwordError: false,
+}
 
 const reducer = (state: IState, action: TAction): IState => {
   switch (action.type) {
@@ -35,6 +43,8 @@ const reducer = (state: IState, action: TAction): IState => {
       return { ...state, usernameError: action.payload }
     case 'setPasswordError':
       return { ...state, passwordError: action.payload }
+    case 'reset':
+      return { ...initialState }
     default:
       throw new Error('未处理的action')
   }
@@ -43,12 +53,7 @@ export const LoginForm: FC = () => {
   const closeRef = useRef<any>()
   const login = useUserStore((state) => state.login)
   const [{ username, password, usernameError, passwordError }, dispatch] =
-    useReducer<Reducer<IState, TAction>>(reducer, {
-      username: '',
-      password: '',
-      usernameError: false,
-      passwordError: false,
-    })
+    useReducer<Reducer<IState, TAction>>(reducer, initialState)
 
   const setUsername: ChangeEventHandler<HTMLInputElement> = (e) => {
     dispatch({ type: 'setUsername', payload: e.target.value })
@@ -71,7 +76,11 @@ export const LoginForm: FC = () => {
   const handleSubmit: MouseEventHandler = async (e) => {
     e.preventDefault()
     const onSuccess = () => {
-      if (closeRef.current) closeRef.current.click()
+      message.success('用户登录成功!')
+      if (closeRef.current) {
+        closeRef.current.click()
+        dispatch({ type: 'reset' })
+      }
     }
     if (!usernameError && !passwordError) {
       await login(username, password, onSuccess)
@@ -81,9 +90,7 @@ export const LoginForm: FC = () => {
   return (
     <dialog id='login-form' className='modal'>
       <form className='modal-box pb-16 md:px-16'>
-        <div className='navbar justify-center mb-8'>
-          <Logo />
-        </div>
+        <div className='navbar justify-center mb-8 text-2xl'>登录</div>
         <div className='form-control w-full'>
           <label className='label'>
             <span className='label-text'>用户名</span>
@@ -111,10 +118,19 @@ export const LoginForm: FC = () => {
             onChange={setPassword}
           />
         </div>
-        <div className='form-control mt-8'>
+        <div className='form-control mt-8 text-center'>
           <button className='btn btn-primary' onClick={handleSubmit}>
             登录
           </button>
+          <a
+            className='link link-primary mt-4'
+            onClick={() => {
+              closeRef.current.click()
+              ;(window as any)['register-form']?.showModal()
+            }}
+          >
+            还没有账号? 赶紧注册一个!
+          </a>
         </div>
       </form>
       <form method='dialog' className='modal-backdrop'>

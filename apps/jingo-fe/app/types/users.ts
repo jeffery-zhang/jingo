@@ -24,3 +24,9 @@ export interface IChangePwdParams {
   oldPwd: string
   newPwd: string
 }
+
+export interface IUpdateParams {
+  username?: string
+  mail?: string
+  avatar?: string
+}

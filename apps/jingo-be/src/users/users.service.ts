@@ -66,7 +66,7 @@ export class UsersService {
   }
 
   async update(id: string, updateDto: UpdateDto): Promise<User> {
-    const valid = this.validateUsernameAndMail(
+    const valid = await this.validateUsernameAndMail(
       updateDto.username,
       updateDto.mail,
     )
@@ -92,14 +92,20 @@ export class UsersService {
     username: string,
     mail: string,
   ): Promise<boolean> {
-    const user = await this.findOneByUsername(username)
-    if (user) {
-      throw new ForbiddenException('用户名已存在')
+    if (username) {
+      const user = await this.findOneByUsername(username)
+      if (user) {
+        throw new ForbiddenException('用户名已存在')
+      }
     }
-    const anotherUser = await this.findOneByMail(mail)
-    if (anotherUser) {
-      throw new ForbiddenException('该邮箱已被注册')
+
+    if (mail) {
+      const user = await this.findOneByMail(mail)
+      if (user) {
+        throw new ForbiddenException('该邮箱已被注册')
+      }
     }
+
     return true
   }
 }

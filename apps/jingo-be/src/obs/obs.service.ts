@@ -41,8 +41,24 @@ export class ObsService {
       if (res.status === 200) {
         return url
       }
-    } catch (err) {
-      throw new BadRequestException('上传失败')
+    } catch (err: any) {
+      const msg = err.response?.data || '上传失败'
+      throw new BadRequestException(msg)
+    }
+  }
+
+  async batchUpload(files: Express.Multer.File[]): Promise<string[]> {
+    const uploadPromises: Promise<string>[] = []
+
+    for (const file of files) {
+      uploadPromises.push(this.uploadFile(file))
+    }
+
+    try {
+      return await Promise.all(uploadPromises)
+    } catch (err: any) {
+      const msg = err.response?.message || '批量上传失败'
+      throw new BadRequestException(msg)
     }
   }
 

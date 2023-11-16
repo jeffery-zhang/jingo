@@ -32,7 +32,6 @@ export class AuthService {
 
   public async validateUser(username: string, password: string): Promise<User> {
     const realPwd = decryptPassword(password)
-    console.log('validate user service: ', realPwd)
     const user = await this.userService.findOneByUsername(username)
     if (user) {
       if (!comparePasswords(realPwd, user.password)) {
@@ -63,7 +62,6 @@ export class AuthService {
   ): Promise<User & { token: string }> {
     const { username, mail, password } = registerDto
     const realPwd = decryptPassword(password)
-    console.log('register service: ', realPwd)
     const valid = await this.userService.validateUsernameAndMail(username, mail)
     if (!valid) return null
     const user = await this.userService.create({
@@ -86,7 +84,7 @@ export class AuthService {
       throw new ForbiddenException('新旧密码不能一样')
     }
     return await this.userService.update(id, {
-      password: realNewPwd,
+      password: encryptPasswordForDb(realNewPwd),
     })
   }
 }
