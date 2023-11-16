@@ -62,10 +62,10 @@ const reducer = (state: IState, action: TAction): IState => {
 }
 export const PersonalForm: FC = () => {
   const closeRef = useRef<any>()
-  const { isLogged, user, setUser } = useUserStore((state) => ({
+  const { isLogged, user, verify } = useUserStore((state) => ({
     isLogged: state.isLogged,
     user: state.user,
-    setUser: state.setUser,
+    verify: state.verify,
   }))
   const [{ username, mail, avatar, usernameError, mailError }, dispatch] =
     useReducer<Reducer<IState, TAction>>(reducer, initialState)
@@ -94,14 +94,12 @@ export const PersonalForm: FC = () => {
 
   const handleSubmit: MouseEventHandler = async (e) => {
     e.preventDefault()
-    const onSuccess = async (dto: Partial<IState>) => {
+    const onSuccess = async () => {
       message.success('信息修改成功!')
       if (closeRef.current) {
         closeRef.current.click()
       }
-      if (dto.username) {
-        setUser({ username: dto.username })
-      }
+      await verify()
     }
     const updateDto: Partial<IState> = {}
     if (username !== user?.username) updateDto['username'] = username
@@ -110,7 +108,7 @@ export const PersonalForm: FC = () => {
     if (Object.keys(updateDto).length === 0) return
     if (!usernameError && !mailError) {
       const { success } = await update(updateDto)
-      if (success) onSuccess(updateDto)
+      if (success) onSuccess()
     }
   }
 
