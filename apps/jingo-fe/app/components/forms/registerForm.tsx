@@ -136,7 +136,7 @@ export const RegisterForm: FC = () => {
   }
 
   return (
-    <dialog id='register-form' className='modal'>
+    <dialog id='register-form' className='modal z-20'>
       <form className='modal-box pb-16 md:px-16'>
         <div className='navbar justify-center mb-8 text-2xl'>注册</div>
         <div className='form-control w-full'>

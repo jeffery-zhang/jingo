@@ -6,6 +6,7 @@ import { LoginForm } from './components/forms/loginForm'
 import { RegisterForm } from './components/forms/registerForm'
 import { ChangePwdForm } from './components/forms/changePwd'
 import { PersonalForm } from './components/forms/personalForm'
+import { ImagePreviewLayer } from './components/common/ImagePreviewLayer'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -26,8 +27,9 @@ export default function RootLayout({
         <RegisterForm />
         <ChangePwdForm />
         <PersonalForm />
+        <ImagePreviewLayer />
         {children}
-        <Script src='https://at.alicdn.com/t/c/font_4211111_01me12v5ra0f.js' />
+        <Script src='https://at.alicdn.com/t/c/font_4211111_zailfopsoz.js' />
       </body>
     </html>
   )

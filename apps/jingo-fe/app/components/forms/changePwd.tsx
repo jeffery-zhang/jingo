@@ -89,7 +89,7 @@ export const ChangePwdForm: FC = () => {
   }
 
   return (
-    <dialog id='changePwd-form' className='modal'>
+    <dialog id='changePwd-form' className='modal z-20'>
       <form className='modal-box pb-16 md:px-16'>
         <div className='navbar justify-center mb-8 text-2xl'>修改密码</div>
         <div className='form-control w-full'>

@@ -10,5 +10,8 @@ export { InfoIcon } from './components/InfoIcon'
 export { WarningIcon } from './components/WarningIcon'
 export { ErrorIcon } from './components/ErrorIcon'
 export { SearchIcon } from './components/SearchIcon'
+export { UploadIcon } from './components/UploadIcon'
+export { PreviewIcon } from './components/PreviewIcon'
+export { DeleteIcon } from './components/DeleteIcon'
 
 export default Icon

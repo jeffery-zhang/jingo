@@ -1,7 +1,9 @@
 import { ChangeEventHandler, FC, useEffect, useState } from 'react'
 import Image from 'next/image'
+import { UploadIcon } from '@jingo/icons'
 
 import { batchUpload } from '../../service/common'
+import { Thumbnail } from './thumbnail'
 
 export interface IUploadProps {
   value: string[]
@@ -72,14 +74,16 @@ export const Upload: FC<IUploadProps> = ({
 
   return (
     <div className='form-control w-full max-w-xs'>
-      <input
-        type='file'
-        // value={value}
-        onChange={onFileListChange}
-        className='file-input file-input-bordered w-full max-w-xs'
-        accept={type}
-        multiple={multiple}
-      />
+      <div className='relative w-24 btn btn-neutral cursor-pointer'>
+        <UploadIcon className='w-8 h-8 cursor-pointer' />
+        <input
+          type='file'
+          onChange={onFileListChange}
+          className='opacity-0 w-full h-full absolute left-0 top-0 cursor-pointer'
+          accept={type}
+          multiple={multiple}
+        />
+      </div>
       <label className='label'>
         {errMsg ? (
           <span className='label-text text-error'>{errMsg}</span>
@@ -95,17 +99,6 @@ export const ImageUpload: FC<IUploadImageProps> = ({
   imgShape = 'rect',
   ...rest
 }) => {
-  const getShapeClassName = (shape: IUploadImageProps['imgShape']) => {
-    switch (shape) {
-      case 'rounded':
-        return 'rounded'
-      case 'circle':
-        return 'rounded-full'
-      default:
-        return ''
-    }
-  }
-
   return (
     <div>
       <Upload {...rest} type='image/*' />
@@ -113,14 +106,7 @@ export const ImageUpload: FC<IUploadImageProps> = ({
         {rest.value
           .filter((url) => !!url)
           .map((url) => (
-            <div className='relative w-16 h-16' key={url}>
-              <Image
-                src={url}
-                fill
-                alt='image'
-                className={`${getShapeClassName(imgShape)} object-cover`}
-              />
-            </div>
+            <Thumbnail src={url} imgShape={imgShape} key={url} />
           ))}
       </div>
     </div>

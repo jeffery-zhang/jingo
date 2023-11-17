@@ -8,6 +8,11 @@ export enum Theme {
 interface IGlobalStore {
   theme: Theme
   setTheme: (theme: IGlobalStore['theme']) => void
+  imagePreview: {
+    visible: boolean
+    src: string
+  }
+  setImagePreview: (state: Partial<IGlobalStore['imagePreview']>) => void
 }
 
 export const useGlobalStore = create<IGlobalStore>((set, get) => ({
@@ -19,5 +24,17 @@ export const useGlobalStore = create<IGlobalStore>((set, get) => ({
       window.document.documentElement.setAttribute('data-theme', theme)
     }
     set({ theme })
+  },
+  imagePreview: {
+    visible: false,
+    src: '',
+  },
+  setImagePreview(state) {
+    set({
+      imagePreview: {
+        ...get().imagePreview,
+        ...state,
+      },
+    })
   },
 }))
